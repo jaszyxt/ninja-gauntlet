@@ -1,0 +1,2299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23e63946'/%3E%3Ccircle cx='16' cy='16' r='8' fill='%23ffc300'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#04060d">
+<title>NINJA GAUNTLET — Six Stages</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#04060d}
+body{font-family:'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;color:#fff;user-select:none;touch-action:none}
+canvas{display:block}
+.hide{display:none!important}
+/* ---------- overlays ---------- */
+.overlay{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px;background:radial-gradient(ellipse at 50% 40%,rgba(8,12,26,.84),rgba(3,5,10,.95));backdrop-filter:blur(3px);overflow-y:auto}
+.logo{font-family:'Arial Black','Segoe UI',Arial,sans-serif;font-weight:900;font-style:italic;font-size:clamp(44px,9vw,88px);line-height:.88;color:#fff;text-shadow:0 5px 0 #6f0f1d,0 14px 40px rgba(0,0,0,.7)}
+.logo span{display:block;color:#ffc300;text-shadow:0 5px 0 #7a5a00,0 14px 40px rgba(0,0,0,.7)}
+.tagchip{background:#e63946;color:#fff;font-weight:800;font-size:11px;letter-spacing:.28em;padding:6px 18px;transform:skew(-10deg)}
+#levelList{display:flex;flex-direction:column;gap:10px;max-width:520px;width:100%}
+.lvlBtn{display:flex;align-items:center;gap:14px;background:rgba(20,26,46,.9);border:2px solid rgba(255,255,255,.18);border-left:6px solid #e63946;padding:12px 18px;cursor:pointer;transform:skew(-6deg);transition:transform .12s,border-color .12s;text-align:left;font-family:inherit;color:#fff}
+.lvlBtn:hover{transform:skew(-6deg) translateX(4px);border-color:#ffc300}
+.lvlBtn .ln{font-family:'Arial Black',Arial;font-weight:900;font-style:italic;font-size:30px;color:#ffc300;min-width:34px}
+.lvlBtn .li{flex:1}
+.lvlBtn .lt{font-weight:900;font-style:italic;letter-spacing:.06em;font-size:16px}
+.lvlBtn .lb{font-size:11px;letter-spacing:.14em;color:#8fa3c8;margin-top:2px}
+.lvlBtn.locked{opacity:.45;cursor:not-allowed;border-left-color:#555}
+.lvlBtn.locked:hover{transform:skew(-6deg);border-color:rgba(255,255,255,.18)}
+.lvlBtn .lock{font-size:20px}
+.ctrl{font-size:12px;letter-spacing:.1em;color:rgba(255,255,255,.72);line-height:2;max-width:680px}
+.kbd{display:inline-block;padding:1px 8px;border:1px solid rgba(255,255,255,.45);border-bottom:3px solid rgba(255,255,255,.45);border-radius:5px;background:#232c4a;font-family:inherit;font-weight:800;font-size:.92em}
+button.big{background:linear-gradient(#ff4d5e,#d62839);color:#fff;border:none;cursor:pointer;font-weight:900;font-style:italic;font-size:20px;letter-spacing:.08em;padding:14px 44px;transform:skew(-10deg);box-shadow:0 6px 0 #7a1120,0 14px 26px rgba(0,0,0,.5);font-family:inherit}
+button.big:hover{transform:skew(-10deg) translateY(-2px);filter:brightness(1.1)}
+button.big.gold{background:linear-gradient(#ffe17e,#e8a812);box-shadow:0 6px 0 #7a5a00;color:#241a00}
+button.ghost{background:transparent;border:2px solid rgba(255,255,255,.35);color:#cdd8ee;font-size:13px;padding:10px 24px;letter-spacing:.12em;font-weight:800;cursor:pointer;font-family:inherit;transform:skew(-8deg)}
+button.ghost:hover{border-color:#fff;color:#fff}
+.btnrow{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
+.overlay .bigT{font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-style:italic;font-size:clamp(38px,8vw,80px);line-height:.95;text-shadow:0 5px 0 rgba(0,0,0,.4),0 14px 40px rgba(0,0,0,.7)}
+.bigT.red{color:#ff4d5e}.bigT.yellow{color:#ffc300}.bigT.gold{color:#ffe17e;text-shadow:0 5px 0 #6b5200,0 0 40px rgba(255,215,0,.5)}
+.sub{font-size:14px;letter-spacing:.22em;color:#cdd8ee;font-weight:700}
+.tip{max-width:480px;font-size:13.5px;color:rgba(255,255,255,.78);line-height:1.65}
+.time{font-family:Consolas,'Menlo',monospace;font-weight:800;font-size:48px;color:#fff;font-variant-numeric:tabular-nums;text-shadow:0 0 30px rgba(255,195,0,.35)}
+/* ---------- SETTINGS ---------- */
+#settingsPanel{display:flex;flex-direction:column;gap:16px;max-width:460px;width:100%;text-align:left}
+.setSection{background:rgba(20,26,46,.85);border:1px solid rgba(255,255,255,.12);padding:16px 20px}
+.setSection h3{font-size:11px;letter-spacing:.3em;color:#ffd95e;font-weight:800;margin-bottom:12px}
+.setRow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;gap:12px}
+.setRow label{font-size:13px;font-weight:600;color:#cdd8ee;flex:1}
+.setRow .val{font-size:12px;color:#ffd95e;font-weight:800;min-width:36px;text-align:right}
+input[type=range]{width:120px;accent-color:#e63946;height:4px}
+.setToggle{width:44px;height:22px;background:#39415a;border-radius:11px;position:relative;cursor:pointer;transition:background .2s}
+.setToggle.on{background:#43d17a}
+.setToggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .2s}
+.setToggle.on::after{left:24px}
+.setSelect{background:#232c4a;color:#fff;border:1px solid rgba(255,255,255,.3);padding:4px 8px;font-family:inherit;font-size:12px;font-weight:700}
+#settingsBtn{position:fixed;right:14px;bottom:46px;z-index:40;background:rgba(8,12,24,.7);border:1px solid rgba(255,255,255,.18);color:#cdd8ee;font-size:10px;font-weight:800;letter-spacing:.18em;padding:8px 14px;cursor:pointer;font-family:inherit}
+#settingsBtn:hover{color:#fff;border-color:#fff}
+#fps{position:fixed;left:14px;top:60px;z-index:41;font-family:monospace;font-size:11px;color:#43d17a;background:rgba(0,0,0,.5);padding:2px 8px;border-radius:3px}
+/* ---------- HUD ---------- */
+#hud{position:fixed;inset:0;z-index:10;pointer-events:none}
+#stageTag{position:absolute;top:14px;left:18px;background:rgba(8,12,24,.72);border:1px solid rgba(255,255,255,.14);border-left:4px solid #ffc300;padding:8px 14px;font-weight:900;font-style:italic;letter-spacing:.1em;font-size:13px}
+#timer{position:absolute;top:14px;right:18px;background:rgba(8,12,24,.72);border:1px solid rgba(255,255,255,.14);border-right:4px solid #e63946;padding:8px 16px;font-family:Consolas,'Menlo',monospace;font-weight:800;font-size:28px;font-variant-numeric:tabular-nums}
+#progress{position:absolute;top:60px;left:50%;transform:translateX(-50%);display:flex;align-items:flex-start;gap:10px}
+.pnode{display:flex;flex-direction:column;align-items:center;gap:5px;width:56px}
+.pnode .dot{width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.4);transition:all .25s}
+.pnode .plabel{font-size:7px;font-weight:800;letter-spacing:.08em;color:rgba(255,255,255,.55);white-space:nowrap}
+.pnode.done .dot{background:#ffc300;border-color:#ffc300;box-shadow:0 0 10px rgba(255,195,0,.7)}
+.pnode.done .plabel{color:#ffd95e}
+.pnode.active .dot{border-color:#fff;background:rgba(255,255,255,.25);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.5)}50%{box-shadow:0 0 0 6px rgba(255,255,255,0)}}
+#flash{position:absolute;top:24%;left:50%;transform:translate(-50%,-50%);font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-style:italic;font-size:clamp(24px,4.6vw,44px);color:#ffc300;letter-spacing:.04em;text-shadow:0 3px 0 rgba(0,0,0,.55),0 0 30px rgba(255,195,0,.45);opacity:0;white-space:nowrap}
+#flash.red{color:#ff4d5e}
+#flash.show{animation:pop 1.1s ease-out forwards}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}10%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}20%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-52%) scale(1)}}
+#obsCard{position:absolute;top:6px;left:50%;transform:translateX(-50%);display:flex;gap:14px;align-items:center;background:rgba(10,14,28,.92);border:1px solid rgba(255,255,255,.18);border-left:5px solid #ffc300;padding:12px 18px;opacity:0;transition:opacity .35s;max-width:min(600px,92vw);pointer-events:none}
+#obsCard.show{opacity:1}
+#obsCard.pill{padding:5px 14px;gap:10px;border-left-width:4px}
+#obsCard.pill .num{font-size:14px;min-width:24px;height:24px}
+#obsCard.pill .name{font-size:12px;letter-spacing:.08em}
+#obsCard.pill .desc{display:none}
+#obsCard .num{background:#ffc300;color:#111;font-weight:900;font-size:22px;min-width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-style:italic;flex-shrink:0}
+#obsCard .name{font-weight:900;font-style:italic;letter-spacing:.06em;font-size:15px}
+#obsCard .desc{font-size:12px;color:#c8d4ec;line-height:1.5;margin-top:3px}
+#prompt{position:absolute;bottom:64px;left:50%;transform:translateX(-50%);background:rgba(8,12,24,.8);border:1px solid rgba(255,255,255,.14);border-left:4px solid #ffc300;padding:10px 20px;font-size:14px;font-weight:700;letter-spacing:.1em;white-space:nowrap}
+#prompt.good{border-left-color:#43d17a;color:#a5f0c5}
+#prompt.bad{border-left-color:#ff4d5e;color:#ffb3ba}
+#meterWrap{position:absolute;bottom:112px;left:50%;transform:translateX(-50%);width:270px;display:flex;flex-direction:column;gap:5px;align-items:center}
+#meterLabel{font-size:10px;font-weight:800;letter-spacing:.3em;color:#ffd95e}
+#meterBar{position:relative;width:100%;height:14px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);overflow:hidden}
+#meterFill{height:100%;width:100%;background:linear-gradient(90deg,#43d17a,#9be15d)}
+#meterFill.warn{background:linear-gradient(90deg,#ff4d5e,#ff8c42)}
+#salZone{position:absolute;top:0;bottom:0;background:rgba(67,209,122,.35);border-left:2px solid #43d17a;border-right:2px solid #43d17a}
+#salMark{position:absolute;top:-2px;bottom:-2px;width:5px;background:#fff;box-shadow:0 0 8px #fff}
+#balWrap{position:absolute;bottom:112px;left:50%;transform:translateX(-50%);width:250px;display:flex;flex-direction:column;gap:4px;align-items:center}
+#balWrap .blab{font-size:10px;font-weight:800;letter-spacing:.3em;color:#ffd95e}
+#balTrack{position:relative;width:100%;height:14px;border:1px solid rgba(255,255,255,.3);background:linear-gradient(90deg,#ff4d5e,#3a4258 22%,#43d17a 38%,#43d17a 62%,#3a4258 78%,#ff4d5e)}
+#balMarker{position:absolute;top:50%;left:50%;width:10px;height:20px;background:#fff;transform:translate(-50%,-50%);border-radius:2px;box-shadow:0 0 8px rgba(255,255,255,.8)}
+#steerHint{position:absolute;bottom:154px;left:50%;transform:translateX(-50%);font-weight:900;font-style:italic;font-size:19px;letter-spacing:.06em;text-shadow:0 2px 10px rgba(0,0,0,.7);color:#fff}
+#speedGauge{position:absolute;bottom:106px;left:50%;transform:translateX(-50%);width:300px;display:flex;flex-direction:column;gap:5px;align-items:center}
+#spdLabel{font-size:10px;letter-spacing:.3em;color:#ffd95e;font-weight:800}
+#spdTrack{position:relative;width:100%;height:16px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25)}
+#spdFill{height:100%;width:0%;background:linear-gradient(90deg,#ff4d5e,#ffc300)}
+#spdFill.ready{background:linear-gradient(90deg,#43d17a,#9be15d);animation:glowp .5s infinite alternate}
+@keyframes glowp{from{filter:brightness(1)}to{filter:brightness(1.4)}}
+#spdTick{position:absolute;top:-4px;bottom:-4px;width:3px;background:#fff}
+#spdState{font-size:12px;font-weight:800;letter-spacing:.14em;color:#c8d4ec}
+#spdState.ready{color:#7ef0a8}
+#ctrlHint{position:absolute;left:14px;bottom:38px;font-size:10px;letter-spacing:.08em;color:rgba(255,255,255,.45);line-height:1.9}
+#ctrlHint b{color:rgba(255,255,255,.8)}
+/* ---------- misc ---------- */
+#muteBtn{position:fixed;right:14px;bottom:12px;z-index:40;background:rgba(8,12,24,.7);border:1px solid rgba(255,255,255,.18);color:#cdd8ee;font-size:10px;font-weight:800;letter-spacing:.18em;padding:8px 14px;cursor:pointer;font-family:inherit}
+#muteBtn:hover{color:#fff;border-color:#fff}
+#vignette{position:fixed;inset:0;z-index:5;pointer-events:none;background:radial-gradient(ellipse at center,transparent 52%,rgba(2,4,10,.6) 100%)}
+#credit{position:fixed;left:12px;bottom:12px;z-index:6;font-size:9px;letter-spacing:.2em;color:rgba(255,255,255,.3);pointer-events:none}
+/* ---------- touch ---------- */
+#touchUI{position:fixed;inset:0;z-index:20;pointer-events:none}
+.tbtn{position:absolute;bottom:90px;width:84px;height:84px;border-radius:50%;background:rgba(35,44,74,.85);border:3px solid rgba(255,255,255,.45);color:#fff;font-weight:900;font-size:26px;pointer-events:auto;display:flex;align-items:center;justify-content:center}
+#btnL{left:22px}#btnR{left:122px;background:rgba(230,57,70,.85)}
+#jumpBtn{position:absolute;right:26px;bottom:96px;width:96px;height:96px;border-radius:50%;background:rgba(255,195,0,.9);border:3px solid rgba(255,255,255,.5);color:#111;font-weight:900;font-size:15px;pointer-events:auto;display:flex;align-items:center;justify-content:center}
+#pauseBtn{left:auto;right:26px;bottom:auto;top:132px;width:52px;height:52px;font-size:15px;opacity:.75;letter-spacing:-2px}
+@media (max-width:760px),(max-height:520px){
+ #timer{font-size:19px;padding:6px 12px}#stageTag{font-size:11px;padding:6px 10px}
+ #progress{top:54px}.pnode{width:38px}.pnode .plabel{font-size:6px}
+ #ctrlHint{display:none}#settingsPanel{max-width:92vw}
+ #credit{display:none}
+}
+/* ===== touch tiers — class-driven, so odd viewport sizes can never fall through ===== */
+body.touchdev #ctrlHint{display:none}
+body.touchdev #credit{display:none}
+/* chrome in the top-right corner, clear of both thumbs */
+body.touchdev #muteBtn{top:58px;right:10px;bottom:auto;left:auto;padding:5px 9px;font-size:9px;opacity:.85}
+body.touchdev #settingsBtn{top:92px;right:10px;bottom:auto;left:auto;padding:5px 9px;font-size:9px;opacity:.85}
+/* instructions live at the TOP on touch — never over the runner */
+body.touchdev #prompt{top:6px;bottom:auto;max-width:60vw;padding:6px 12px;font-size:11px;white-space:normal;text-align:center}
+/* milestone card rides low on touch — in the gap between the thumb clusters */
+body.touchdev #obsCard{max-width:60vw}
+body.touchdev #obsCard .desc{font-size:10.5px}
+/* phone tier: compact thumb controls */
+body.phonetier .tbtn{width:94px;height:94px;bottom:calc(26px + env(safe-area-inset-bottom));opacity:.6;transition:opacity .12s,transform .08s}
+body.phonetier #btnL{left:calc(14px + env(safe-area-inset-left))}
+body.phonetier #btnR{left:calc(122px + env(safe-area-inset-left))}
+body.phonetier #jumpBtn{width:116px;height:116px;bottom:calc(30px + env(safe-area-inset-bottom));right:calc(16px + env(safe-area-inset-right));font-size:17px;opacity:.75}
+body.phonetier .tbtn:active,body.phonetier #jumpBtn:active{opacity:1;transform:scale(1.05)}
+body.phonetier #meterWrap,body.phonetier #balWrap{bottom:150px;width:200px}
+body.phonetier #speedGauge{bottom:150px;width:230px}
+body.phonetier #steerHint{bottom:196px;font-size:15px}
+/* rotate gate: portrait touch devices must rotate — the game plays in landscape */
+#rotateHint{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(3,5,10,.94);text-align:center;padding:20px}
+#rotateHint .spin{font-size:64px;color:#ffc300;animation:rot 2.2s ease-in-out infinite}
+@keyframes rot{0%,20%{transform:rotate(0)}60%,100%{transform:rotate(90deg)}}
+@media (orientation:portrait) and (pointer:coarse){#rotateHint{display:flex}}
+/* tablet tier: same touch language, roomier controls */
+body.tabletdev .tbtn{width:106px;height:106px;bottom:calc(28px + env(safe-area-inset-bottom));opacity:.55;transition:opacity .12s,transform .08s}
+body.tabletdev #btnL{left:calc(18px + env(safe-area-inset-left))}
+body.tabletdev #btnR{left:calc(140px + env(safe-area-inset-left))}
+body.tabletdev #jumpBtn{width:130px;height:130px;bottom:calc(34px + env(safe-area-inset-bottom));right:calc(20px + env(safe-area-inset-right));font-size:19px;opacity:.75}
+body.tabletdev .tbtn:active,body.tabletdev #jumpBtn:active{opacity:1;transform:scale(1.05)}
+body.tabletdev #meterWrap,body.tabletdev #balWrap{bottom:180px;width:220px}
+body.tabletdev #speedGauge{bottom:180px;width:250px}
+body.tabletdev #steerHint{bottom:226px}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="title" class="overlay">
+  <div class="tagchip">SIX STAGES · ONE BUZZER EACH · TOTAL VICTORY</div>
+  <div class="logo">NINJA<span>GAUNTLET</span></div>
+  <div id="levelList"></div>
+  <div class="ctrl" id="ctrlKeys"><span class="kbd">→</span>/<span class="kbd">D</span> run&nbsp;&nbsp;·&nbsp;&nbsp;<span class="kbd">SPACE</span> jump / release&nbsp;&nbsp;·&nbsp;&nbsp;<span class="kbd">R</span> retry checkpoint&nbsp;&nbsp;·&nbsp;&nbsp;<span class="kbd">T</span> restart stage&nbsp;&nbsp;·&nbsp;&nbsp;<span class="kbd">M</span> sound&nbsp;&nbsp;·&nbsp;&nbsp;<span class="kbd">P</span> pause<br>Beat a stage to unlock the next. Every stage keeps its own course record.</div>
+</div>
+
+<div id="hud" class="hide">
+  <div id="stageTag">STAGE 1</div>
+  <div id="timer">00:00.00</div>
+  <div id="progress"></div>
+  <div id="flash"></div>
+  <div id="obsCard"><div class="num">1</div><div><div class="name"></div><div class="desc"></div></div></div>
+  <div id="steerHint"></div>
+  <div id="balWrap" style="display:none"><div class="blab">POSITION ON LOG</div><div id="balTrack"><div id="balMarker"></div></div></div>
+  <div id="meterWrap" style="display:none"><div id="meterLabel">GRIP</div><div id="meterBar"><div id="meterFill"></div><div id="salZone"></div><div id="salMark"></div></div></div>
+  <div id="speedGauge" style="display:none"><div id="spdLabel">WALL SPEED</div><div id="spdTrack"><div id="spdFill"></div><div id="spdTick"></div></div><div id="spdState"></div></div>
+  <div id="prompt" style="display:none"></div>
+  <div id="ctrlHint"><b>→ / D</b> run · <b>SPACE</b> jump / release · <b>R</b> checkpoint · <b>T</b> restart · <b>M</b> sound · <b>P</b> pause</div>
+</div>
+
+<div id="failOv" class="overlay hide">
+  <div class="bigT red">SPLASHED OUT!</div>
+  <div class="sub" id="failObs"></div>
+  <div class="tip" id="failTip"></div>
+  <div class="btnrow">
+    <button id="retryBtn" class="big">RETRY CHECKPOINT — R</button>
+    <button id="restartBtn" class="ghost">RESTART STAGE — T</button>
+  </div>
+</div>
+
+<div id="winOv" class="overlay hide">
+  <div class="bigT yellow" id="winTitle">COURSE CLEARED!</div>
+  <div class="time" id="winTime"></div>
+  <div class="sub" id="winBest"></div>
+  <div class="btnrow">
+    <button id="nextBtn" class="big gold hide">NEXT STAGE — N</button>
+    <button id="againBtn" class="big">RUN IT AGAIN — R</button>
+    <button id="selectBtn" class="ghost">STAGE SELECT</button>
+  </div>
+</div>
+
+<div id="pauseOv" class="overlay hide">
+  <div class="bigT yellow">PAUSED</div>
+  <div class="sub">PRESS P / ESC TO RESUME</div>
+  <button id="resumeBtn" class="big">RESUME</button>
+</div>
+
+<div id="rotateHint">
+  <div class="spin">&#8635;</div>
+  <div class="sub">ROTATE YOUR PHONE</div>
+  <div class="tip">NINJA GAUNTLET plays in landscape mode.</div>
+</div>
+
+<div id="settingsOv" class="overlay hide">
+  <div class="bigT yellow">SETTINGS</div>
+  <div id="settingsPanel"></div>
+  <div class="btnrow">
+    <button id="settingsClose" class="big">BACK</button>
+  </div>
+</div>
+
+<button id="muteBtn">SOUND ON</button>
+<button id="settingsBtn">SETTINGS</button>
+<div id="fps" class="hide">--</div>
+<div id="touchUI" class="hide">
+  <div class="tbtn" id="btnL">&#9664;</div>
+  <div class="tbtn" id="btnR">&#9654;</div>
+  <div id="jumpBtn">JUMP</div>
+  <div class="tbtn" id="pauseBtn">&#10074;&#10074;</div>
+</div>
+<div id="vignette"></div>
+<div id="credit">FAN-MADE 2.5D TRIBUTE · SIX STAGES · SETTINGS SYSTEM · V9</div>
+
+<script>
+'use strict';
+/* ============================================================
+   NINJA GAUNTLET — six-stage edition with settings (pass 8)
+   Pure Canvas 2D + vanilla JS. No libraries. Runs anywhere.
+   ============================================================ */
+(function(){
+
+/* ================= CANVAS ================= */
+const cvs=document.getElementById('game');
+const ctx=cvs.getContext('2d');
+let W=0,H=0,SCALE=40,viewW=10,viewH=8;
+function resize(){
+  const dpr=Math.min(window.devicePixelRatio||1,SET.quality==='high'?2:SET.quality==='medium'?1.5:1);
+  W=window.innerWidth;H=window.innerHeight;
+  cvs.width=W*dpr;cvs.height=H*dpr;
+  cvs.style.width=W+'px';cvs.style.height=H+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  SCALE=Math.max(20,Math.min(H/8.5,W/9)); /* floor guards degenerate 0-size embedded viewports */
+  viewW=W/SCALE;viewH=H/SCALE;
+  if(crowdFar.length){crowdFarCv=bakeCrowd(crowdFar,'#090d18');crowdNearCv=bakeCrowd(crowdNear,'#0b0f1c');}
+}
+window.addEventListener('resize',resize);
+
+/* ================= SETTINGS ================= */
+const SETTINGS_KEY='gauntletSettings';
+let SET={volume:0.9,sfx:true,ambient:true,shake:true,quality:'high',hints:true,difficulty:'normal',timerOn:true,showFPS:false,cardInfo:true,soundOn:true};
+function loadSettings(){try{const s=JSON.parse(localStorage.getItem(SETTINGS_KEY));if(s&&typeof s==='object')SET=Object.assign(SET,s);}catch(e){}}
+function saveSettings(){try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(SET));}catch(e){}}
+loadSettings();
+function applySettings(){
+  Sfx.muted=SET.soundOn===false;
+  if(Sfx.master)Sfx.master.gain.value=Sfx.muted?0:SET.volume;
+  cvs.style.display='block';
+  resize();
+}
+function diffMul(v){return SET.difficulty==='hard'?v:1;}
+function diffSub(v){return SET.difficulty==='hard'?v:0;}
+function diffGrip(){return SET.difficulty==='hard'?1.3:1;}
+
+/* ================= HELPERS ================= */
+const TAU=Math.PI*2;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const rand=(a,b)=>a+Math.random()*(b-a);
+const smooth=t=>t*t*(3-2*t);
+let camX=-1,camY=-2.2;
+const sx=x=>(x-camX)*SCALE;
+const sy=y=>H-(y-camY)*SCALE;
+
+const GRAV=-30,MAXV=8,JUMPV=11,GRIPMAX=8;
+const WGRAV=12,WALL_LUNGE=0.97;
+
+/* ================= AUDIO ================= */
+const Sfx={
+  ctx:null,master:null,muted:false,noiseBuf:null,amb:false,ambNodes:null,
+  init(){if(this.ctx)return;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+    this.ctx=new AC();this.master=this.ctx.createGain();this.master.gain.value=this.muted?0:SET.volume;this.master.connect(this.ctx.destination);
+    const len=2*this.ctx.sampleRate;this.noiseBuf=this.ctx.createBuffer(1,len,this.ctx.sampleRate);
+    const d=this.noiseBuf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;},
+  tone(f,o){o=o||{};if(!this.ctx||!SET.sfx)return;const t=this.ctx.currentTime+(o.when||0);
+    const os=this.ctx.createOscillator();os.type=o.type||'sine';os.frequency.setValueAtTime(f,t);
+    if(o.f2)os.frequency.exponentialRampToValueAtTime(Math.max(o.f2,1),t+(o.dur||0.15));
+    const g=this.ctx.createGain();g.gain.setValueAtTime(o.vol||0.2,t);g.gain.exponentialRampToValueAtTime(0.001,t+(o.dur||0.15));
+    os.connect(g);g.connect(this.master);os.start(t);os.stop(t+(o.dur||0.15)+0.02);},
+  noise(o){o=o||{};if(!this.ctx||!SET.sfx)return;const t=this.ctx.currentTime+(o.when||0);
+    const s=this.ctx.createBufferSource();s.buffer=this.noiseBuf;s.loop=true;
+    const f=this.ctx.createBiquadFilter();f.type=o.type||'lowpass';f.frequency.setValueAtTime(o.from||1000,t);
+    if(o.to)f.frequency.exponentialRampToValueAtTime(Math.max(o.to,10),t+(o.dur||0.3));
+    const g=this.ctx.createGain();g.gain.setValueAtTime(o.vol||0.3,t);g.gain.exponentialRampToValueAtTime(0.001,t+(o.dur||0.3));
+    s.connect(f);f.connect(g);g.connect(this.master);s.start(t);s.stop(t+(o.dur||0.3)+0.02);},
+  step(){this.tone(150+rand(0,40),{dur:.05,type:'triangle',vol:.05});},
+  jump(){this.tone(280,{f2:640,dur:.16,type:'square',vol:.08});},
+  land(h){this.noise({dur:.12,vol:.1+h*.1,from:600,to:150});this.tone(85,{dur:.09,vol:.14});},
+  grab(){this.tone(760,{dur:.06,type:'square',vol:.1});this.tone(520,{dur:.05,type:'square',vol:.07,when:.04});},
+  release(){this.noise({dur:.25,vol:.1,from:2500,to:400,type:'bandpass'});},
+  splash(){this.noise({dur:.7,vol:.5,from:1200,to:120});this.tone(220,{f2:60,dur:.4,vol:.25});},
+  milestone(){this.tone(523,{dur:.09,type:'square',vol:.12});this.tone(784,{dur:.14,type:'square',vol:.12,when:.09});},
+  ping(){this.tone(880,{dur:.12,vol:.16});this.tone(1320,{dur:.1,vol:.08,when:.03});},
+  scrape(){this.noise({dur:.5,vol:.16,from:900,to:250});},
+  bonk(){this.tone(120,{f2:60,dur:.15,type:'square',vol:.18});},
+  hop(){this.tone(420,{f2:900,dur:.18,type:'square',vol:.12});},
+  boing(){this.tone(160,{f2:660,dur:.3,type:'square',vol:.13});},
+  zip(){this.noise({dur:.6,vol:.1,from:500,to:1600,type:'bandpass'});},
+  buzzer(){if(!this.ctx||!SET.sfx)return;const t=this.ctx.currentTime;
+    [330,494].forEach(f=>{const o=this.ctx.createOscillator();o.type='square';o.frequency.value=f;
+      const g=this.ctx.createGain();g.gain.setValueAtTime(0.15,t);g.gain.setValueAtTime(0.15,t+0.85);g.gain.exponentialRampToValueAtTime(0.001,t+1);
+      o.connect(g);g.connect(this.master);o.start(t);o.stop(t+1.05);});},
+  fanfare(){if(!this.ctx||!SET.sfx)return;[523,659,784,1047].forEach((f,i)=>this.tone(f,{dur:.3,type:'square',vol:.14,when:i*0.13}));},
+  aww(){this.tone(420,{f2:170,dur:.7,type:'sawtooth',vol:.07});this.noise({dur:.7,vol:.06,from:800,to:300});},
+  cheer(l){if(!this.ctx||!SET.sfx)return;this.noise({dur:.9+l*.8,vol:.1+.12*l,from:900,to:1600,type:'bandpass'});
+    for(let i=0;i<3;i++)this.tone(900+rand(0,700),{dur:.25,vol:.03,when:rand(0,.5)});},
+  startAmb(){if(!this.ctx||this.amb||!SET.ambient)return;this.amb=true;
+    const s=this.ctx.createBufferSource();s.buffer=this.noiseBuf;s.loop=true;
+    const f=this.ctx.createBiquadFilter();f.type='bandpass';f.frequency.value=750;f.Q.value=.6;
+    const g=this.ctx.createGain();g.gain.value=.035;
+    const lfo=this.ctx.createOscillator();lfo.frequency.value=.13;
+    const lg=this.ctx.createGain();lg.gain.value=.015;lfo.connect(lg);lg.connect(g.gain);
+    s.connect(f);f.connect(g);g.connect(this.master);s.start();lfo.start();
+    this.ambNodes=[s,lfo];},
+  stopAmb(){if(!this.ctx||!this.amb)return;this.amb=false;
+    if(this.ambNodes)for(const n of this.ambNodes){try{n.stop();}catch(e){}try{n.disconnect();}catch(e){}}
+    this.ambNodes=null;}
+};
+
+/* ================= SAVE ================= */
+const SAVE_UNLOCK='gauntletUnlock',SAVE_BEST='gauntletBest';
+function getUnlock(){try{return clamp(parseInt(localStorage.getItem(SAVE_UNLOCK))||1,1,6);}catch(e){return 1;}}
+function setUnlock(n){try{localStorage.setItem(SAVE_UNLOCK,String(n));}catch(e){}}
+function getBest(n){try{const v=parseFloat(localStorage.getItem(SAVE_BEST+n));return isFinite(v)?v:null;}catch(e){return null;}}
+function setBest(n,t){try{localStorage.setItem(SAVE_BEST+n,String(t));}catch(e){}}
+
+/* ================= HERO / GAME STATE ================= */
+const P={x:2.5,y:1.25,vx:0,vy:0,dir:1,grounded:true};
+const G={state:'TITLE',timeScale:1,t:0,envT:0,runTime:0,timerStarted:false,milestone:0,
+  grip:GRIPMAX,noGrabT:0,hadLadder:false,hθ:0,hw:0,hl:1.25,wasWin:false,hangItem:null,
+  ropeDone:0,
+  onLog:false,drag:2.4,logSpin:0,groundIdx:-1,prevY:1.25,
+  ws:0,wv:0,wv0:8,slide:false,bonk:false,
+  salRung:0,salHop:0,salFrom:0,salPhase:'hang',salM:0,salGreen:false,salBuf:0,
+  zipS:0,zipV:0,
+  cCliff:null,cGrip:0,cCrux:false,
+  ropeStr:100,ropeLast:null,ropeGrace:0,cGripMax:9,paused:false,
+  ferHandle:-1,ferGrip:0,ferBuf:0,
+  ledge:null,ledgeFrom:null,lt:0,ct:0,cfx:0,cfy:0,ctx2:0,cty2:0,
+  failT:0,failShown:false,splashed:false,failName:'',failTip:'',failCam:0,
+  winT:0,winShown:false,bursts:[],newBest:false,
+  coyote:0,jumpBuf:0,runPhase:0,hspSm:0,warned:false,cheer:0,shake:0,
+  cards:[]};
+let jumpEdge=false;
+
+/* ================= STAGE DEFINITIONS ================= */
+function PL(x0,x1,y,o){return Object.assign({x0:x0,x1:x1,y:y},o||{});}
+const STAGE_META=[
+  {name:'CITY QUALIFIERS',theme:{sky:['#05070f','#0a1024','#0e1830'],waterA:'rgba(13,79,143,0.82)',waterB:'rgba(5,26,54,0.95)',surf:'rgba(140,190,240,0.35)',refl:'255,220,150',cone:'rgba(180,210,255,'}},
+  {name:'CITY FINALS',theme:{sky:['#1b0a12','#33101f','#57203c'],waterA:'rgba(14,74,92,0.82)',waterB:'rgba(5,29,36,0.95)',surf:'rgba(255,180,140,0.3)',refl:'255,190,140',cone:'rgba(255,190,150,'}},
+  {name:'NATIONAL FINALS',theme:{sky:['#07040a','#140816','#2c1028'],waterA:'rgba(22,28,66,0.82)',waterB:'rgba(8,7,26,0.95)',surf:'rgba(210,150,255,0.3)',refl:'255,130,210',cone:'rgba(230,150,255,'}},
+  {name:'MT. MIDORIYAMA',theme:{sky:['#0c0a14','#241a2e','#54401c'],waterA:'rgba(14,58,74,0.82)',waterB:'rgba(4,22,30,0.95)',surf:'rgba(255,215,140,0.3)',refl:'255,210,120',cone:'rgba(255,220,170,'}},
+  {name:'ALL-STARS INVITATIONAL',theme:{sky:['#0d1117','#1a2332','#2d3a4a'],waterA:'rgba(30,80,120,0.82)',waterB:'rgba(10,30,50,0.95)',surf:'rgba(180,220,255,0.3)',refl:'200,230,255',cone:'rgba(200,230,255,'}},
+  {name:'WORLD FINALS',theme:{sky:['#0f0508','#220a10','#3d1414'],waterA:'rgba(120,40,50,0.82)',waterB:'rgba(40,10,15,0.95)',surf:'rgba(255,120,100,0.3)',refl:'255,80,80',cone:'rgba(255,100,80,'}}
+];
+
+function buildStage(n){
+  const w={n:n,meta:STAGE_META[n-1],plats:[],ledges:[],cp:[],grabs:[],cliffs:[],salmon:null,zip:null,rope:null,log:null,
+    ferris:null,tilts:[],
+    wall:null,topY:0,buzzer:null,clamps:[],signs:[],obstacles:[],ms:[],wallMs:0,
+    prompts:[],failZones:[],cards:[],uiGauge:[0,0],width:70,spawn:{x:2.5,y:1.25}};
+  const pads=(arr,o)=>arr.forEach(a=>w.plats.push(PL(a[0],a[1],a[2]||0.5,Object.assign({pad:true},o||{}))));
+  if(n===1){
+    w.width=70;w.spawn={x:2.5,y:1.25};
+    w.plats=[PL(6.5,8.3,0.5,{pad:true}),PL(9.5,11.3,0.5,{pad:true}),PL(12.5,14.3,0.5,{pad:true}),PL(15.5,17.3,0.5,{pad:true}),PL(18.5,20.3,0.5,{pad:true}),
+      PL(21.5,26,0.5),PL(33,38,0.5),PL(38.8,44.2,1.2,{log:true}),PL(45,59,0.5,{chev:[51,58.6]}),PL(62,66,4.7)];
+    w.log={x0:38.8,x1:44.2,top:1.2,bot:0.55};
+    w.grabs=[{kind:'bar',ax:29.5,ay:4.0,grabR:2.0,yMin:2.0,boost:[3.5,1.5],bx0:27.9,bx1:31.1,px:[27.8,31.2]}];
+    w.wall={x:59,h:4.2,leg:25,ready:7.5,entry:4.0};
+    w.topY=4.7;w.buzzer={x:65,y:5.55,gold:false};
+    w.clamps=[{y0:4.2,y1:7,x0:62.2,x1:65.7}];
+    w.ledges=[{x0:21.5,y:0.5},{x0:33,y:0.5},{x0:45,y:0.5}];
+    w.cp=[{x:2.5,y:1.25},{x:23.5,y:1.25},{x:35.5,y:1.25},{x:46.5,y:1.25},{x:63,y:5.45}];
+    w.obstacles=['STEPS','TRAPEZE GRIP','ROLLING LOG','WALL','BUZZER'];
+    w.ms=[{idx:1,x:22.5,y0:0.9,y1:2,label:'STEPS CLEAR'},{idx:2,x:34,y0:0.9,y1:2,label:'TRAPEZE GRIP CLEAR'},{idx:3,x:46,y0:0.9,y1:2,label:'ROLLING LOG CLEAR'}];
+    w.wallMs=4;
+    w.prompts=[
+      {x0:5.5,x1:21.5,t:'JUMP TO THE <b style="color:#ffe66d">GLOWING PAD</b> — <span class="kbd">SPACE</span>'},
+      {x0:21.5,x1:26,t:'JUMP AND GRAB THE BAR — <span class="kbd">SPACE</span>'},
+      {x0:26,x1:33,t:'KEEP FLYING — AUTO-GRAB!'},
+      {x0:33,x1:37.6,t:'JUMP ONTO THE ROLLING LOG — <span class="kbd">SPACE</span>'},
+      {x0:41.8,x1:44.7,t:'JUMP TO THE PLATFORM — <span class="kbd">SPACE</span>'},
+      {x0:44.7,x1:58.4,t:'BUILD SPEED — FULL SPRINT INTO THE WALL!'}];
+    w.failZones=[
+      {x1:5.5,name:'THE START',tip:'Run right and jump the gaps — the glowing pad is your target.'},
+      {x1:21.5,name:'THE QUINTUPLE STEPS',tip:'Press SPACE right at the platform edge and keep holding \u2192 in the air.'},
+      {x1:33,name:'THE TRAPEZE GRIP',tip:'Jump off the edge (SPACE) — you latch onto the bar automatically.'},
+      {x1:38,name:'THE TRAPEZE GRIP',tip:'You released too early — build a bigger swing first.'},
+      {x1:44.7,name:'THE ROLLING LOG',tip:'Hold \u2192 the whole way across — the red ends are the danger zone.'},
+      {x1:59.4,name:'THE RUNWAY',tip:'Full sprint, no hesitation — the wall needs real speed.'},
+      {x1:999,name:'THE WARPED WALL',tip:'Sprint the whole runway — get the bar to GO, then charge!'}];
+    w.cards=[
+      {at:-999,num:'1',name:'QUINTUPLE STEPS',desc:'Hold <span class="kbd">&#8594;</span> to sprint, <span class="kbd">SPACE</span> to jump each gap. The <b style="color:#ffc300">glowing pad</b> is next. Fall short and you might catch the ledge!'},
+      {at:22.2,num:'2',name:'TRAPEZE GRIP',desc:'Jump toward the bar — you grab it automatically. Your run-up powers a real pendulum. Release on the <b style="color:#43d17a">green flash</b>.'},
+      {at:33.6,num:'3',name:'ROLLING LOG',desc:'Jump ONTO the roller, then hold <span class="kbd">&#8594;</span> — the surface drags you backward. <b style="color:#ff4d5e">Red ends are the danger zone</b>!'},
+      {at:45.2,num:'4',name:'WARPED WALL',desc:'Sprint into the wall at FULL SPEED — you run up it on momentum. Slow = stall and slide back. Run back and hit it again!'}];
+    w.uiGauge=[44.7,59.2];
+    w.signs=[{x:5.6,y:4.5,t:'1 · QUINTUPLE STEPS'},{x:23.8,y:5.1,t:'2 · TRAPEZE GRIP'},{x:35.5,y:5.3,t:'3 · ROLLING LOG'},{x:52,y:5.3,t:'4 · WARPED WALL'}];
+  }
+  else if(n===2){
+    w.width=90;w.spawn={x:2.5,y:1.25};
+    pads([[6.3,8.2],[8.9,10.8],[11.5,13.4],[14.1,16.0],[16.7,18.6]],{y:0.7,sink:{rate:0.55,rec:0.5}});
+    w.plats.push(PL(19.3,23.3,0.5));
+    w.plats.push(PL(29.6,34.2,3.4));
+    w.plats.push(PL(44.0,52.5,0.5));
+    w.plats.push(PL(60.8,64.4,3.9));
+    w.plats.push(PL(64.4,77.5,0.5,{chev:[69,76.8]}));
+    w.plats.push(PL(80.5,84.5,4.7));
+    w.salmon={cx:27.5,railL:26.2,railR:28.8,top:6.6,rungs:[3.4,4.2,5.0,5.8],grabR:1.5,spd:3.2,green:[0.63,0.93],grip:7,dismount:[8.0,3.0]};
+    w.grabs=[
+      {kind:'rope',ax:36,ay:6.5,L:2.6,grabR:1.6,yMin:1.0,boost:[2.5,1.5],seq:0},
+      {kind:'rope',ax:40,ay:6.5,L:2.6,grabR:1.6,yMin:1.0,boost:[2.5,1.5],seq:1}];
+    w.ropeBeam={x0:34.6,x1:42.6,y:6.6};
+    w.cliffs=[{x0:53,x1:61,y:3.9,spd:1.6,grip:9,drain:1.0,crux:{x0:56,x1:57.6,drain:2.2,spd:1.05}}];
+    w.wall={x:77.5,h:4.2,leg:25,ready:7.5,entry:4.0};
+    w.topY=4.7;w.buzzer={x:83.5,y:5.55,gold:false};
+    w.clamps=[{y0:4.2,y1:7,x0:80.7,x1:84.2}];
+    w.ledges=[{x0:19.3,y:0.5},{x0:29.6,y:3.4},{x0:44.0,y:0.5},{x0:60.8,y:3.9}];
+    w.cp=[{x:2.5,y:1.25},{x:21,y:1.25},{x:31.5,y:4.15},{x:48.5,y:1.25},{x:70,y:1.25},{x:81.3,y:5.45}];
+    w.obstacles=['DOMINOES','SALMON LADDER','ROPE SWING','CLIFFHANGER','WALL','BUZZER'];
+    w.ms=[{idx:1,x:20.3,y0:0.9,y1:2,label:'DOMINOES CLEAR'},
+          {idx:2,x:29.9,y0:3.8,y1:5,label:'SALMON LADDER CLEAR'},
+          {idx:3,x:44.5,y0:0.9,y1:2,label:'ROPE SWING CLEAR'},
+          {idx:4,x:61.4,y0:4.3,y1:5.5,label:'CLIFFHANGER CLEAR'}];
+    w.wallMs=5;
+    w.prompts=[
+      {x0:5.5,x1:19.3,t:'JUMP THE GAPS — <b style="color:#ff4d5e">THE PADS SINK!</b>'},
+      {x0:19.3,x1:23.3,t:'JUMP TO THE LADDER BAR — <span class="kbd">SPACE</span>'},
+      {x0:23.3,x1:29.6,t:'CATCH THE BAR!'},
+      {x0:29.6,x1:34.2,t:'SPRINT OFF THE EDGE — GRAB THE ROPE!'},
+      {x0:34.2,x1:44.0,t:'GRAB THE ROPE!'},
+      {x0:44.0,x1:52.5,t:'JUMP UP — CATCH THE LEDGE!'},
+      {x0:52.5,x1:60.8,t:'CATCH THE LEDGE!'},
+      {x0:60.8,x1:64.4,t:'DROP DOWN AND SPRINT!'},
+      {x0:64.4,x1:77,t:'BUILD SPEED — FULL SPRINT INTO THE WALL!'}];
+    w.failZones=[
+      {x1:5.5,name:'THE START',tip:'Run right — jump the gaps, the pads sink under you!'},
+      {x1:23.3,name:'THE DOMINO STEPS',tip:'Jump the gaps and keep moving — the pads sink while you stand on them!'},
+      {x1:29.6,name:'THE SALMON LADDER',tip:'Jump from the platform to the bar, then hop on the GREEN flash.'},
+      {x1:44.0,name:'THE ROPE SWING',tip:'Sprint straight off the edge to catch the rope — release on the GREEN flash, catch the next one!'},
+      {x1:60.8,name:'THE CLIFFHANGER',tip:'Jump up and catch the ledge — cross the red crux fast, grip drains!'},
+      {x1:77.5,name:'THE RUNWAY',tip:'Full sprint — no hesitation.'},
+      {x1:999,name:'THE WARPED WALL',tip:'Full sprint — get the bar to GO, then charge!'}];
+    w.cards=[
+      {at:-999,num:'1',name:'DOMINO STEPS',desc:'These pads <b style="color:#ff4d5e">SINK while you stand on them</b>. Jump the gaps and keep moving!'},
+      {at:19.5,num:'2',name:'SALMON LADDER',desc:'Jump to the bar. Press <span class="kbd">SPACE</span> when the marker hits the <b style="color:#43d17a">GREEN zone</b> to hop the bar up a rung. Miss = splash!'},
+      {at:29.6,num:'3',name:'ROPE SWING',desc:'Sprint off the edge — you latch onto the rope. Swing, release on the <b style="color:#43d17a">green flash</b>, catch the second rope mid-air!'},
+      {at:44.0,num:'4',name:'CLIFFHANGER',desc:'Jump up and catch the ledge, then traverse right. <b style="color:#ff4d5e">Red sections are CRUXES</b> — slower, grip drains faster!'}];
+    w.uiGauge=[64.6,77.7];
+    w.signs=[{x:5.6,y:4.5,t:'1 · DOMINO STEPS'},{x:27.5,y:7.4,t:'2 · SALMON LADDER'},{x:38.3,y:7.9,t:'3 · ROPE SWING'},{x:57,y:5.7,t:'4 · CLIFFHANGER'},{x:71,y:5.3,t:'5 · WARPED WALL'}];
+  }
+  else if(n===3){
+    w.width=93;w.spawn={x:2.5,y:1.25};
+    pads([[6.5,8.3],[9.9,11.7],[13.3,15.1],[16.7,18.5]]);
+    w.plats.push(PL(20.5,24.5,0.5));
+    w.plats.push(PL(34.2,38.8,0.5));
+    w.plats.push(PL(40,41.4,0.5,{bounce:true}));
+    w.plats.push(PL(53.8,58.2,4.3));
+    pads([[58.8,61],[61.2,63.4],[63.6,65.8],[66,68.2]],{sink:{rate:0.85,rec:0.35},bridge:true});
+    w.plats.push(PL(68.2,82,0.5,{chev:[71,81]}));
+    w.plats.push(PL(85,89,5.5));
+    w.zip={x0:25.8,y0:4.2,x1:33.8,y1:3.2,v0:1.5,acc:3.5,grabR:1.7};
+    w.cliffs=[{x0:44,x1:54,y:4.3,spd:1.6,grip:9,drain:0.8,crux:{x0:47,x1:48.5,drain:1.7,spd:1.1}}];
+    w.wall={x:82,h:5.0,leg:30,ready:7.6,entry:4.2};
+    w.topY=5.5;w.buzzer={x:88,y:6.35,gold:false};
+    w.clamps=[{y0:5,y1:8,x0:85.2,x1:88.7}];
+    w.ledges=[{x0:20.5,y:0.5},{x0:34.2,y:0.5},{x0:53.8,y:4.3},{x0:68.2,y:0.5}];
+    w.cp=[{x:2.5,y:1.25},{x:22,y:1.25},{x:36,y:1.25},{x:55.5,y:5.05},{x:70,y:1.25},{x:85.8,y:6.25}];
+    w.obstacles=['QUAD STEPS','ROPE GLIDER','CLIFFHANGER','BREAKAWAY','WALL','BUZZER'];
+    w.ms=[{idx:1,x:21.5,y0:0.9,y1:2,label:'QUAD STEPS CLEAR'},
+          {idx:2,x:35,y0:0.9,y1:2,label:'ROPE GLIDER CLEAR'},
+          {idx:3,x:54.6,y0:4.6,y1:5.8,label:'CLIFFHANGER CLEAR'},
+          {idx:4,x:69.4,y0:0.9,y1:2,label:'BREAKAWAY CLEAR'}];
+    w.wallMs=5;
+    w.prompts=[
+      {x0:5.5,x1:20.5,t:'LEAP THE BIG GAPS — <span class="kbd">SPACE</span>'},
+      {x0:20.5,x1:24.5,t:'JUMP TO THE HANDLE — <span class="kbd">SPACE</span>'},
+      {x0:24.5,x1:34.2,t:'HOLD ON!'},
+      {x0:34.2,x1:38.8,t:'JUMP TO THE BOUNCE PAD — <span class="kbd">SPACE</span>'},
+      {x0:38.8,x1:53.8,t:'BOUNCE UP — CATCH THE LEDGE!'},
+      {x0:53.8,x1:58.2,t:'DROP ONTO THE BRIDGE — GO GO GO!'},
+      {x0:58.2,x1:68.4,t:'SPRINT — <b style="color:#ff4d5e">THE TILES SINK!</b>'},
+      {x0:68.4,x1:81.5,t:'BUILD SPEED — THIS WALL IS TALLER!'}];
+    w.failZones=[
+      {x1:5.5,name:'THE START',tip:'Run right — the gaps are bigger here. Full-speed jumps!'},
+      {x1:20.5,name:'THE QUAD STEPS',tip:'Bigger gaps — jump at full speed, SPACE right at the edge.'},
+      {x1:34.2,name:'THE ROPE GLIDER',tip:'Jump to the handle and ride the zipline to the end!'},
+      {x1:41.4,name:'THE BOUNCE PAD',tip:'Jump onto the blue pad — it launches you up to the ledge!'},
+      {x1:58.2,name:'THE CLIFFHANGER',tip:'Bounce up, catch the ledge, and cross the red crux — grip drains!'},
+      {x1:68.4,name:'THE BREAKAWAY BRIDGE',tip:'Sprint without stopping — the tiles sink fast!'},
+      {x1:82,name:'THE RUNWAY',tip:'Full sprint — this wall is taller.'},
+      {x1:999,name:'THE WARPED WALL',tip:'This wall is TALLER — you need every bit of speed. Bar must say GO!'}];
+    w.cards=[
+      {at:-999,num:'1',name:'QUAD STEPS',desc:'The gaps are wider now — <b>full-speed jumps</b> only.'},
+      {at:20.6,num:'2',name:'ROPE GLIDER',desc:'Leap and grab the handle — you ride the cable down at speed. <span class="kbd">SPACE</span> lets go early if you dare!'},
+      {at:34.6,num:'3',name:'BOUNCE + CLIFFHANGER',desc:'Jump onto the <b style="color:#4cc9f0">blue pad</b> — it launches you sky-high. Catch the ledge above and traverse — <b style="color:#ff4d5e">red = crux</b>!'},
+      {at:56.5,num:'4',name:'BREAKAWAY BRIDGE',desc:'Drop onto the bridge and <b>SPRINT</b> — the tiles sink under your feet. Do not stop!'}];
+    w.uiGauge=[68.6,82.2];
+    w.signs=[{x:5.6,y:4.5,t:'1 · QUAD STEPS'},{x:22.5,y:5.1,t:'2 · ROPE GLIDER'},{x:48,y:6.3,t:'3 · CLIFFHANGER'},{x:63.5,y:3.8,t:'4 · BREAKAWAY'},{x:75,y:5.4,t:'5 · WARPED WALL'}];
+  }
+  else if(n===4){
+    w.width=97;w.spawn={x:2.5,y:1.25};
+    pads([[6.3,8.2],[8.9,10.8],[11.5,13.4],[14.1,16.0],[16.7,18.6]],{y:0.7,sink:{rate:0.75,rec:0.5}});
+    w.plats.push(PL(19.3,23.3,0.5));
+    w.plats.push(PL(29.6,34.2,3.4));
+    w.plats.push(PL(43.5,49,0.5));
+    w.plats.push(PL(57.5,59.9,3.3));
+    w.plats.push(PL(69,73,3.3));
+    w.plats.push(PL(73.0,86.5,0.5,{chev:[77,85.7]}));
+    w.plats.push(PL(89.5,93.5,5.7));
+    w.plats.push(PL(91.8,94.5,12.2,{legTo:5.7}));
+    w.salmon={cx:27.5,railL:26.2,railR:28.8,top:7.0,rungs:[3.4,4.1,4.8,5.5,6.2],grabR:1.5,spd:3.8,green:[0.66,0.94],grip:7,dismount:[8.0,3.0]};
+    w.grabs=[
+      {kind:'rope',ax:36.2,ay:6.5,L:2.6,grabR:1.6,yMin:1.0,boost:[2.5,1.5],seq:0},
+      {kind:'rope',ax:40.5,ay:6.5,L:2.6,grabR:1.6,yMin:1.0,boost:[2.5,1.5],seq:1}];
+    w.ropeBeam={x0:34.6,x1:43.3,y:6.6};
+    w.cliffs=[
+      {x0:50.5,x1:57.5,y:3.3,spd:1.65,grip:8,drain:0.9,crux:{x0:53,x1:54.5,drain:1.8,spd:1.1}},
+      {x0:61,x1:69,y:3.3,spd:1.65,grip:8,drain:0.9,crux:{x0:64,x1:66,drain:1.8,spd:1.1}}];
+    w.wall={x:86.5,h:5.2,leg:32,ready:7.7,entry:4.2};
+    w.topY=5.7;
+    w.buzzer={x:93.0,y:13.05,gold:true};
+    w.clamps=[{y0:5.2,y1:8,x0:89.7,x1:93.2},{y0:11.7,y1:14,x0:92.0,x1:94.2}];
+    w.rope={x:91.2,y0:5.7,y1:12.2,px:92.0,beam:{x0:90.0,x1:92.5,y:14}};
+    w.ledges=[{x0:19.3,y:0.5},{x0:29.6,y:3.4},{x0:43.5,y:0.5},{x0:57.5,y:3.3},{x0:69,y:3.3}];
+    w.cp=[{x:2.5,y:1.25},{x:21,y:1.25},{x:31.5,y:4.15},{x:45.5,y:1.25},{x:70.5,y:4.05},{x:90.2,y:6.45}];
+    w.obstacles=['DOMINOES','SALMON LADDER','ROPE SWING','CLIFFS','MEGA WALL','ROPE CLIMB','BUZZER'];
+    w.ms=[{idx:1,x:20.3,y0:0.9,y1:2,label:'DOMINOES CLEAR'},
+          {idx:2,x:29.9,y0:3.8,y1:5,label:'SALMON LADDER CLEAR'},
+          {idx:3,x:44.5,y0:0.9,y1:2,label:'ROPE SWING CLEAR'},
+          {idx:4,x:69.8,y0:3.7,y1:5,label:'CLIFFS CLEAR'},
+          {idx:6,x:91.6,y0:12.4,y1:13.6,label:'ROPE CLIMB CLEAR'}];
+    w.wallMs=5;w.ropeMs=6;
+    w.prompts=[
+      {x0:5.5,x1:19.3,t:'JUMP THE GAPS — <b style="color:#ff4d5e">PADS SINK FAST!</b>'},
+      {x0:19.3,x1:23.3,t:'JUMP TO THE LADDER BAR — <span class="kbd">SPACE</span>'},
+      {x0:23.3,x1:29.6,t:'CATCH THE BAR!'},
+      {x0:29.6,x1:34.2,t:'SPRINT OFF — GRAB THE ROPE!'},
+      {x0:34.2,x1:43.5,t:'GRAB THE ROPE!'},
+      {x0:43.5,x1:49,t:'JUMP UP — CATCH THE LEDGE!'},
+      {x0:49,x1:57.5,t:'CATCH THE LEDGE!'},
+      {x0:57.5,x1:59.9,t:'REST — <b style="color:#43d17a">GRIP RESET!</b> THEN JUMP \u2192'},
+      {x0:59.9,x1:61,t:'JUMP TO THE SECOND LEDGE!'},
+      {x0:61,x1:69,t:'CATCH THE LEDGE!'},
+      {x0:73.0,x1:86,t:'BUILD SPEED — FULL SPRINT!'},
+      {x0:89.5,x1:93.5,y0:5,y1:8,t:'JUMP AND GRAB THE ROPE!'}];
+    w.failZones=[
+      {x1:5.5,name:'THE START',tip:'Run right — jump fast, the pads sink quickly!'},
+      {x1:23.3,name:'THE DOMINO STEPS',tip:'The pads sink FAST — jump the gaps without hesitating!'},
+      {x1:29.6,name:'THE SALMON LADDER',tip:'Five rungs, tighter timing — hop only on the GREEN flash!'},
+      {x1:43.5,name:'THE ROPE SWING',tip:'Sprint off the edge — release on GREEN, catch the second rope!'},
+      {x1:69,name:'THE CLIFFHANGER',tip:'Two ledges with an island between — your grip resets on the island!'},
+      {x1:86.5,name:'THE MEGA WALL',tip:'5.2 metres — the bar must say GO before you charge!'},
+      {x1:999,name:'THE ROPE CLIMB',tip:'Tap \u2190 \u2192 alternately — strength empty means you drop back and lose time!'}];
+    w.cards=[
+      {at:-999,num:'1',name:'DOMINO STEPS',desc:'Finals-grade dominoes — <b style="color:#ff4d5e">they sink fast</b>. Keep jumping!'},
+      {at:19.5,num:'2',name:'SALMON LADDER',desc:'Five rungs and a faster marker. Hop on the <b style="color:#43d17a">GREEN flash</b> only!'},
+      {at:29.6,num:'3',name:'ROPE SWING',desc:'Sprint off, swing, release on GREEN, catch rope two — no mercy.'},
+      {at:43.8,num:'4',name:'DOUBLE CLIFFHANGER',desc:'Two ledges with a rest island between — your grip resets when you pull up on the island!'},
+      {at:72.8,num:'5',name:'MEGA WALL + ROPE CLIMB',desc:'A 5.2 m wall, then the final ascent: jump to the rope and <b>tap \u2190 \u2192 alternately</b> to climb. Strength empty = you drop back — the clock keeps running. Reach the top for <b style="color:#ffe17e">TOTAL VICTORY</b>!'}];
+    w.uiGauge=[73.4,86.7];
+    w.signs=[{x:5.6,y:4.5,t:'1 · DOMINOES'},{x:27.5,y:7.6,t:'2 · SALMON LADDER'},{x:38.4,y:7.9,t:'3 · ROPE SWING'},{x:54,y:5.2,t:'4 · CLIFFHANGER'},{x:79,y:5.4,t:'5 · MEGA WALL'},{x:91.2,y:15.4,t:'6 · ROPE CLIMB'}];
+  }
+  else if(n===5){
+    w.width=102;w.spawn={x:2.5,y:1.25};
+    pads([[6.3,8.0],[8.7,10.4],[11.1,12.8],[13.5,15.2],[15.9,17.6],[18.3,20.0]],{y:0.7,sink:{rate:0.75,rec:0.4}});
+    w.plats.push(PL(20.8,24.8,0.5));
+    w.salmon={cx:27.5,railL:26.2,railR:28.8,top:7.0,rungs:[3.4,4.1,4.8,5.5,6.2],grabR:1.5,spd:4.2,green:[0.67,0.93],grip:7,dismount:[8.0,3.0]};
+    w.plats.push(PL(29.6,34.2,3.4));
+    /* FERRIS WHEEL — new mechanic: rotating handles, timed release */
+    w.ferris={cx:39.5,cy:5.5,r:3.0,speed:1.3,grabR:1.7,grip:9,boost:[5.0,5.5],angle:0};
+    w.plats.push(PL(43.5,50.5,0.5));
+    /* Wingnut Alley: two cliff sections with the rest ledge between them */
+    w.plats.push(PL(52.0,54.3,3.3));
+    w.cliffs=[
+      {x0:49.6,x1:51.9,y:3.3,spd:1.7,grip:9,drain:0.9,crux:{x0:50,x1:51.2,drain:1.8,spd:1.1}},
+      {x0:54.8,x1:66,y:3.9,spd:1.7,grip:9,drain:0.9,crux:{x0:59.5,x1:61.5,drain:2.0,spd:1.05}}];
+    w.plats.push(PL(66.0,70.0,3.9));
+    w.plats.push(PL(70.0,84.5,0.5,{chev:[74,84]}));
+    w.plats.push(PL(87.5,91.5,5.7));
+    w.wall={x:84.5,h:5.3,leg:33,ready:7.6,entry:4.2};
+    w.topY=5.7;w.buzzer={x:89.5,y:6.55,gold:false};
+    w.clamps=[{y0:5.2,y1:8,x0:87.7,x1:91.2}];
+    w.ledges=[{x0:20.8,y:0.5},{x0:29.6,y:3.4},{x0:43.5,y:0.5},{x0:66.0,y:3.9}];
+    w.cp=[{x:2.5,y:1.25},{x:22.5,y:1.25},{x:31.5,y:4.15},{x:46.5,y:1.25},{x:68,y:4.65},{x:88.4,y:6.45}];
+    w.obstacles=['SPEED STEPS','SALMON LADDER','FERRIS WHEEL','WINGNUT ALLEY','WALL','BUZZER'];
+    w.ms=[{idx:1,x:21.8,y0:0.9,y1:2,label:'SPEED STEPS CLEAR'},
+          {idx:2,x:29.9,y0:3.8,y1:5,label:'SALMON LADDER CLEAR'},
+          {idx:3,x:44.5,y0:0.9,y1:2,label:'FERRIS WHEEL CLEAR'},
+          {idx:4,x:66.5,y0:4.3,y1:5.5,label:'WINGNUT ALLEY CLEAR'}];
+    w.wallMs=5;
+    w.prompts=[
+      {x0:5.5,x1:20.8,t:'JUMP — <b style="color:#ff4d5e">THE PADS SINK FAST!</b>'},
+      {x0:20.8,x1:24.8,t:'JUMP TO THE LADDER BAR — <span class="kbd">SPACE</span>'},
+      {x0:24.8,x1:29.6,t:'CATCH THE BAR!'},
+      {x0:29.6,x1:34.2,t:'JUMP AND GRAB A WHEEL HANDLE!'},
+      {x0:34.2,x1:43.5,t:'RIDE THE WHEEL!'},
+      {x0:43.5,x1:50.5,t:'JUMP UP — CATCH THE LEDGE!'},
+      {x0:50.5,x1:70,t:'CROSS THE WINGNUT ALLEY!'},
+      {x0:70,x1:84,t:'BUILD SPEED — FULL SPRINT INTO THE WALL!'}];
+    w.failZones=[
+      {x1:5.5,name:'THE START',tip:'Run right — the pads sink fast, keep moving!'},
+      {x1:20.8,name:'THE SPEED STEPS',tip:'Six fast-sinking pads — don\'t stop!'},
+      {x1:29.6,name:'THE SALMON LADDER',tip:'Five rungs, faster marker — hop only on the GREEN flash!'},
+      {x1:43.5,name:'THE FERRIS WHEEL',tip:'Grab a handle at the bottom, ride up, release at the TOP of the arc!'},
+      {x1:70.0,name:'THE WINGNUT ALLEY',tip:'Two cliff sections with a rest ledge — the red cruxes drain grip fast!'},
+      {x1:84.5,name:'THE RUNWAY',tip:'Full sprint — no hesitation.'},
+      {x1:999,name:'THE WARPED WALL',tip:'5.3m — get the bar to GO, then charge!'}];
+    w.cards=[
+      {at:-999,num:'1',name:'SPEED STEPS',desc:'Six fast-sinking dominoes — <b style="color:#ff4d5e">barely a moment\'s pause!</b>'},
+      {at:21,num:'2',name:'SALMON LADDER',desc:'Five rungs, fast marker. Hop on the <b style="color:#43d17a">GREEN flash</b> only!'},
+      {at:29.6,num:'3',name:'FERRIS WHEEL',desc:'<b style="color:#4cc9f0">NEW!</b> Jump and grab a rotating handle. Ride it to the top of the arc, then <span class="kbd">SPACE</span> to release!'},
+      {at:43.5,num:'4',name:'WINGNUT ALLEY',desc:'Two cliff sections with a rest ledge between — your grip resets on the ledge!'},
+      {at:70,num:'5',name:'WARPED WALL',desc:'5.3m — sprint the full runway!'}];
+    w.uiGauge=[70.2,84.7];
+    w.signs=[{x:5.6,y:4.5,t:'1 · SPEED STEPS'},{x:27.5,y:7.6,t:'2 · SALMON LADDER'},{x:39.5,y:10.0,t:'3 · FERRIS WHEEL'},{x:58,y:5.2,t:'4 · WINGNUT ALLEY'},{x:77,y:5.3,t:'5 · WARPED WALL'}];
+  }
+  else{
+    w.width=112;w.spawn={x:2.5,y:1.25};
+    pads([[6.3,7.9],[8.5,10.1],[10.7,12.3],[12.9,14.5],[15.1,16.7],[17.3,18.9],[19.5,21.1]],{y:0.7,sink:{rate:0.8,rec:0.3}});
+    w.plats.push(PL(21.9,25.9,0.5));
+    w.salmon={cx:28.5,railL:27.2,railR:29.8,top:7.0,rungs:[3.4,4.1,4.8,5.5,6.2],grabR:1.4,spd:4.5,green:[0.68,0.92],grip:7,dismount:[8.0,3.0]};
+    w.plats.push(PL(30.6,35.2,3.4));
+    /* Triple rope swing */
+    w.grabs=[
+      {kind:'rope',ax:37,ay:7.0,L:2.6,grabR:1.5,yMin:1.0,boost:[2.5,1.5],seq:0},
+      {kind:'rope',ax:41,ay:7.0,L:2.6,grabR:1.5,yMin:1.0,boost:[2.5,1.5],seq:1},
+      {kind:'rope',ax:45,ay:7.0,L:2.6,grabR:1.5,yMin:1.0,boost:[2.5,1.5],seq:2}];
+    w.ropeBeam={x0:35.5,x1:46.5,y:7.1};
+    w.plats.push(PL(49.0,55.0,0.5));
+    /* Tilting Tables — new mechanic: a real see-saw, your side dips and you slide off */
+    w.plats.push(PL(56.5,62.5,2.2,{tilt:{factor:0.14,max:0.42,current:0,rest:0.5}}));
+    w.plats.push(PL(64.0,70.0,2.2,{tilt:{factor:0.14,max:0.42,current:0,rest:0.5}}));
+    w.plats.push(PL(71.5,75.5,3.9));
+    w.cliffs=[{x0:76,x1:83,y:3.9,spd:1.7,grip:9,drain:0.95,crux:{x0:76.5,x1:78,drain:2.0,spd:1.05},
+             crux2:{x0:79,x1:81,drain:2.0,spd:1.05}}];
+    w.plats.push(PL(83.0,87.0,3.9));
+    w.plats.push(PL(87.0,96.0,0.5,{chev:[91,95]}));
+    w.plats.push(PL(99.0,103.0,6.7));
+    w.plats.push(PL(101.3,104.0,13.2,{legTo:6.7}));
+    w.wall={x:96.0,h:6.0,leg:40,ready:7.75,entry:4.5};
+    w.topY=6.7;
+    w.buzzer={x:102.5,y:14.05,gold:true};
+    w.clamps=[{y0:6.2,y1:9,x0:99.2,x1:102.7},{y0:12.7,y1:15,x0:101.5,x1:103.7}];
+    w.rope={x:101.2,y0:6.7,y1:13.2,px:102.0,beam:{x0:100.0,x1:102.5,y:15}};
+    w.ledges=[{x0:21.9,y:0.5},{x0:30.6,y:3.4},{x0:49.0,y:0.5},{x0:71.5,y:3.9}];
+    /* NOTE: no checkpoint on the tilt tables — respawning off-center on a
+       see-saw is a death loop. cp before them (51.5) and on the ledge after
+       (73.5) bracket the obstacle. */
+    w.cp=[{x:2.5,y:1.25},{x:23.5,y:1.25},{x:32.5,y:4.15},{x:51.5,y:1.25},{x:73.5,y:4.65},{x:99.8,y:7.45}];
+    w.obstacles=['SEVEN STEPS','SALMON LADDER','TRIPLE ROPE','TILT TABLES','CLIFFHANGER','ULTRA WALL','ROPE CLIMB','BUZZER'];
+    w.ms=[{idx:1,x:22.9,y0:0.9,y1:2,label:'SEVEN STEPS CLEAR'},
+          {idx:2,x:30.9,y0:3.8,y1:5,label:'SALMON LADDER CLEAR'},
+          {idx:3,x:49.5,y0:0.9,y1:2,label:'TRIPLE ROPE CLEAR'},
+          {idx:4,x:71.8,y0:4.3,y1:5.5,label:'TILT TABLES CLEAR'},
+          {idx:5,x:83.5,y0:4.3,y1:5.5,label:'CLIFFHANGER CLEAR'},
+          {idx:7,x:101.6,y0:13.4,y1:14.6,label:'ROPE CLIMB CLEAR'}];
+    w.wallMs=6;w.ropeMs=7;
+    w.prompts=[
+      {x0:5.5,x1:21.9,t:'JUMP — <b style="color:#ff4d5e">SPEED IS EVERYTHING!</b>'},
+      {x0:21.9,x1:25.9,t:'JUMP TO THE LADDER BAR — <span class="kbd">SPACE</span>'},
+      {x0:25.9,x1:30.6,t:'CATCH THE BAR!'},
+      {x0:30.6,x1:35.2,t:'SPRINT OFF — GRAB THE ROPE!'},
+      {x0:35.2,x1:49.0,t:'SWING — RELEASE ON GREEN — CATCH THE NEXT!'},
+      {x0:49.0,x1:55.0,t:'JUMP UP — CATCH THE FIRST TABLE!'},
+      {x0:55.0,x1:71.5,t:'CROSS — <b style="color:#ff4d5e">DON\'T STAND STILL!</b>'},
+      {x0:71.5,x1:83.0,t:'CATCH THE LEDGE — DOUBLE CRUX!'},
+      {x0:83.0,x1:96.0,t:'BUILD SPEED — ULTRA SPRINT!'},
+      {x0:99.0,x1:103.0,y0:6,y1:9,t:'JUMP AND GRAB THE ROPE!'}];
+    w.failZones=[
+      {x1:5.5,name:'THE START',tip:'Run right — the pads sink very fast!'},
+      {x1:21.9,name:'THE SEVEN STEPS',tip:'Seven ultra-fast pads — never stop!'},
+      {x1:30.6,name:'THE SALMON LADDER',tip:'Five rungs, fastest marker — hop only on the GREEN flash!'},
+      {x1:49.0,name:'THE TRIPLE ROPE',tip:'Three ropes — release on GREEN each time!'},
+      {x1:71.5,name:'THE TILT TABLES',tip:'The tables tip under you — cross fast, don\'t linger!'},
+      {x1:87.0,name:'THE CLIFFHANGER',tip:'Double crux — the red zones drain grip fast!'},
+      {x1:96.0,name:'THE ULTRA WALL',tip:'6.0 metres — you need MAXIMUM sprint speed!'},
+      {x1:999,name:'THE ROPE CLIMB',tip:'Faster drain — tap \u2190 \u2192 alternately without stopping!'}];
+    w.cards=[
+      {at:-999,num:'1',name:'SEVEN STEPS',desc:'Seven ultra-fast sinking pads — <b style="color:#ff4d5e">barely time to think!</b>'},
+      {at:22,num:'2',name:'SALMON LADDER',desc:'Five rungs, fastest marker yet. Hop on the <b style="color:#43d17a">GREEN flash</b>!'},
+      {at:30.6,num:'3',name:'TRIPLE ROPE SWING',desc:'Three ropes — swing, release on green, catch the next one, do it again!'},
+      {at:49.0,num:'4',name:'TILTING TABLES',desc:'<b style="color:#4cc9f0">NEW!</b> The tables tilt under your weight. Keep moving — stand still and you slide off!'},
+      {at:71.5,num:'5',name:'CLIFFHANGER',desc:'Long traverse with a DOUBLE crux — red zones drain grip fast!'},
+      {at:83,num:'6',name:'ULTRA WALL + CLIMB',desc:'6.0 metres — <b>maximum sprint</b>. Then the fastest rope climb yet. Reach the <b style="color:#ffe17e">GOLDEN BUZZER</b>!'}];
+    w.uiGauge=[87.2,96.2];
+    w.signs=[{x:5.6,y:4.5,t:'1 · SEVEN STEPS'},{x:28.5,y:7.6,t:'2 · SALMON LADDER'},{x:41,y:8.4,t:'3 · TRIPLE ROPE'},{x:64,y:4.2,t:'4 · TILT TABLES'},{x:78,y:5.2,t:'5 · CLIFFHANGER'},{x:92,y:5.5,t:'6 · ULTRA WALL'},{x:101.2,y:16.4,t:'7 · ROPE CLIMB'}];
+  }
+  w.plats.unshift(PL(0,5,0.5));
+  return w;
+}
+let WD=buildStage(1);
+const wallT=s=>({x:WD.wall.x+3*s,y:0.5+WD.wall.h*Math.pow(s,1.7)});
+const wallSlope=s=>Math.atan((1.7*WD.wall.h*Math.pow(Math.max(s,0.001),0.7))/3);
+const wallArc=s=>Math.hypot(3,1.7*WD.wall.h*Math.pow(Math.max(s,0.001),0.7));
+function groundBelow(x,refY){
+  let g=-Infinity,gi=-1;
+  for(let i=0;i<WD.plats.length;i++){const p=WD.plats[i];
+    let py=p.y;
+    if(p.tilt){const cx2=(p.x0+p.x1)/2;py=p.y-Math.tan(p.tilt.current)*(x-cx2);}
+    if(x>=p.x0-0.18&&x<=p.x1+0.18&&py<=refY&&py>g){g=py;gi=i;}}
+  return {y:g,i:gi};
+}
+function verifySpawns(){
+  const pts=[WD.spawn].concat(WD.cp);
+  for(const s of pts){
+    const gr=groundBelow(s.x,s.y+0.5);
+    if(gr.y<=-1e7||Math.abs(gr.y+0.75-s.y)>0.61){
+      console.warn('NINJA GAUNTLET spawn check FAILED for',JSON.parse(JSON.stringify(s)),'— snapping to ground.');
+      if(gr.y>-1e7)s.y=gr.y+0.75;
+    }
+  }
+}
+
+/* ================= INPUT ================= */
+const keys={};
+const touch={l:false,r:false};
+const isTouch=('ontouchstart'in window)||navigator.maxTouchPoints>0;
+/* device tiers: phone / tablet / PC each get their own layout */
+const isTablet=isTouch&&Math.min(screen.width,screen.height)>=600;
+function tryStartTimer(){if(G.state==='RUN'&&!G.timerStarted){G.timerStarted=true;flash('GO!');}}
+window.addEventListener('keydown',e=>{
+  if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+  if(e.repeat)return;
+  if(e.code==='KeyM'){toggleMute();return;}
+  if(e.code==='Escape'&&G.state==='SETTINGS'){saveSettings();toggleSettings();return;}
+  if((e.code==='KeyP'||e.code==='Escape')&&G.state!=='TITLE'&&G.state!=='SETTINGS'&&G.state!=='FAIL'&&G.state!=='WIN'){togglePause();return;}
+  if(G.paused)return;
+  keys[e.code]=true;
+  if(e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW')jumpEdge=true;
+  if(e.code==='KeyO'){toggleSettings();return;}
+  if(G.state==='ROPE'&&(e.code==='ArrowLeft'||e.code==='KeyA')){climbTap('L');return;}
+  if(G.state==='ROPE'&&(e.code==='ArrowRight'||e.code==='KeyD')){climbTap('R');return;}
+  if(G.state==='FAIL'&&G.failShown&&['Space','Enter','KeyR'].includes(e.code)){retryCheckpoint();return;}
+  if(e.code==='KeyR'&&G.state!=='TITLE'&&G.state!=='SETTINGS'&&(G.state!=='FAIL'||G.failShown)){G.state==='WIN'?loadStage(WD.n):retryCheckpoint();return;}
+  if(e.code==='KeyT'&&G.state!=='TITLE'&&G.state!=='SETTINGS'){loadStage(WD.n);return;}
+  if(e.code==='KeyN'&&G.state==='WIN'&&WD.n<6){loadStage(WD.n+1);return;}
+  if(['ArrowRight','KeyD','ArrowLeft','KeyA','Space','ArrowUp','KeyW'].includes(e.code))tryStartTimer();
+});
+window.addEventListener('keyup',e=>keys[e.code]=false);
+/* alt-tab / app switch must never leave run keys stuck down */
+const releaseAllKeys=()=>{for(const k in keys)keys[k]=false;touch.l=touch.r=false;};
+window.addEventListener('blur',releaseAllKeys);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseAllKeys();});
+function inputX(){
+  let x=0;
+  if(keys.ArrowRight||keys.KeyD||touch.r)x+=1;
+  if(keys.ArrowLeft||keys.KeyA||touch.l)x-=1;
+  return x;
+}
+if(isTouch){
+  document.body.classList.add('touchdev');
+  document.body.classList.add(isTablet?'tabletdev':'phonetier');
+  document.getElementById('touchUI').classList.remove('hide');
+  const bind=(id,prop,tap)=>{const el=document.getElementById(id);
+    el.addEventListener('touchstart',e=>{e.preventDefault();touch[prop]=true;if(tap&&G.state==='ROPE')climbTap(tap);tryStartTimer();},{passive:false});
+    el.addEventListener('touchend',e=>{e.preventDefault();touch[prop]=false;},{passive:false});
+    el.addEventListener('touchcancel',()=>{touch[prop]=false;});};
+  bind('btnL','l','L');bind('btnR','r','R');
+  const jb=document.getElementById('jumpBtn');
+  jb.addEventListener('touchstart',e=>{e.preventDefault();jumpEdge=true;tryStartTimer();},{passive:false});
+  const pb=document.getElementById('pauseBtn');
+  pb.addEventListener('touchstart',e=>{e.preventDefault();
+    if(G.state!=='TITLE'&&G.state!=='SETTINGS'&&G.state!=='FAIL'&&G.state!=='WIN')togglePause();},{passive:false});
+  /* forgiving run zones: any touch near a run button drives it, so thumb
+     drift never drops the run — nearest button wins in the overlap */
+  const ui=document.getElementById('touchUI');
+  const runPad=22;
+  const rescan=e=>{
+    const bl=document.getElementById('btnL').getBoundingClientRect();
+    const br=document.getElementById('btnR').getBoundingClientRect();
+    const rad=bl.width/2+runPad;
+    let l=false,r=false;
+    for(const t of e.touches){
+      const dl=Math.hypot(t.clientX-(bl.left+bl.width/2),t.clientY-(bl.top+bl.height/2));
+      const dr=Math.hypot(t.clientX-(br.left+br.width/2),t.clientY-(br.top+br.height/2));
+      if(Math.min(dl,dr)<=rad){if(dl<=dr)l=true;else r=true;}
+    }
+    touch.l=l;touch.r=r;
+  };
+  ['touchstart','touchmove','touchend','touchcancel'].forEach(ev=>ui.addEventListener(ev,e=>{
+    if(ev==='touchstart'||ev==='touchmove')e.preventDefault();
+    rescan(e);
+    if(ev==='touchstart')tryStartTimer();
+  },{passive:false}));
+}
+
+/* ================= HUD ================= */
+const $=id=>document.getElementById(id);
+const show=el=>el.classList.remove('hide');
+const hide=el=>el.classList.add('hide');
+const timerEl=$('timer'),promptEl=$('prompt'),flashEl=$('flash'),
+      meterWrap=$('meterWrap'),meterLabel=$('meterLabel'),meterFill=$('meterFill'),
+      salZone=$('salZone'),salMark=$('salMark'),
+      balWrap=$('balWrap'),balMarker=$('balMarker'),steerHintEl=$('steerHint'),
+      speedGauge=$('speedGauge'),spdFill=$('spdFill'),spdState=$('spdState'),
+      obsCard=$('obsCard'),stageTag=$('stageTag');
+let pnodes=[];
+function buildProgress(){
+  const prog=$('progress');prog.innerHTML='';pnodes=[];
+  WD.obstacles.forEach(n=>{const d=document.createElement('div');d.className='pnode';
+    d.innerHTML='<div class="dot"></div><div class="plabel">'+n+'</div>';
+    prog.appendChild(d);pnodes.push(d);});
+  const t=(WD.wall.ready/8*100)+'%';
+  document.getElementById('spdTick').style.left=t;
+}
+function updateProgress(){pnodes.forEach((n,i)=>{
+  n.classList.toggle('done',i<G.milestone);
+  n.classList.toggle('active',i===G.milestone&&G.milestone<pnodes.length);});}
+let lastPrompt='';
+/* touch devices get button verbs (JUMP / ◀ ▶) — prompts never mention PC keys */
+function devicePrompt(html){
+  if(!isTouch)return html;
+  return html
+    .replace(/<span class="kbd">\s*(SPACE|&#8594;|\u2192|&#8592;|\u2190)\s*<\/span>/gi,function(m,inner){
+      if(/SPACE/i.test(inner))return '<span class="kbd">JUMP</span>';
+      return /8594|\u2192/i.test(inner)?'<span class="kbd">\u25B6</span>':'<span class="kbd">\u25C0</span>';
+    })
+    .replace(/SPACE/g,'JUMP')
+    .replace(/\u2192/g,'\u25B6').replace(/\u2190/g,'\u25C0')
+    .replace(/&#8594;/g,'\u25B6').replace(/&#8592;/g,'\u25C0');
+}
+let promptHold=0;
+function setPrompt(html,cls){cls=cls||'';if(!SET.hints){hidePrompt();return;}
+  if(performance.now()<promptHold)return;
+  const k=html+'|'+cls;if(k===lastPrompt)return;lastPrompt=k;
+  promptEl.innerHTML=devicePrompt(html);promptEl.className=cls;promptEl.style.display='block';}
+function hidePrompt(){lastPrompt='x';promptEl.style.display='none';}
+function hidePromptTemp(ms){promptHold=performance.now()+ms;hidePrompt();}
+function hideMeter(){meterWrap.style.display='none';}
+function showFill(label,frac,warn){meterWrap.style.display='flex';meterLabel.textContent=label;
+  meterFill.style.display='block';salZone.style.display='none';salMark.style.display='none';
+  meterFill.style.width=(clamp(frac,0,1)*100)+'%';meterFill.classList.toggle('warn',!!warn);}
+function showSalmon(pos,g0,g1){
+  meterWrap.style.display='flex';meterLabel.textContent='HOP TIMING';
+  meterFill.style.display='none';salZone.style.display='block';salMark.style.display='block';
+  salZone.style.left=(g0*100)+'%';salZone.style.width=((g1-g0)*100)+'%';
+  salMark.style.left='calc('+(pos*100)+'% - 2px)';}
+function flash(t,red){flashEl.textContent=t;flashEl.classList.toggle('red',!!red);
+  flashEl.classList.remove('show');void flashEl.offsetWidth;flashEl.classList.add('show');}
+function fmtTime(t){const m=Math.floor(t/60),s=Math.floor(t%60),c=Math.floor((t%1)*100);
+  return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'.'+String(c).padStart(2,'0');}
+function setMilestone(m,txt){if(G.milestone>=m)return;G.milestone=m;updateProgress();
+  flash(txt);Sfx.milestone();Sfx.cheer(0.6);G.cheer=Math.max(G.cheer,0.9);}
+let cardTimer=null;
+const cardsSeen=new Set();
+function showCard(i){const c=WD.cards[i];if(!c)return;
+  if(SET.cardInfo===false)return;
+  const key=WD.n+':'+i,first=!cardsSeen.has(key);
+  cardsSeen.add(key);
+  obsCard.classList.toggle('pill',!first);
+  obsCard.querySelector('.num').textContent=c.num;
+  obsCard.querySelector('.name').textContent=c.name;
+  obsCard.querySelector('.desc').innerHTML=first?devicePrompt(c.desc):'';
+  obsCard.classList.add('show');
+  hidePromptTemp(first?4300:2000);
+  if(cardTimer)clearTimeout(cardTimer);
+  cardTimer=setTimeout(()=>obsCard.classList.remove('show'),first?4000:1700);}
+
+/* ================= PARTICLES ================= */
+const parts=[];
+function burst(x,y,n,opt){opt=opt||{};
+  for(let i=0;i<n;i++){const a=rand(0,TAU),sp=rand(0.3,1)*(opt.spread||3);
+    parts.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.abs(Math.sin(a))*sp*(opt.up||5)+(opt.up||5)*.3,
+      g:opt.g||14,life:opt.life||1,life0:opt.life||1,size:opt.size||0.15,
+      color:(opt.colors||['#fff'])[i%(opt.colors||['#fff']).length]});}}
+const doSplash=(x)=>burst(x,0.05,60,{spread:3.2,up:7,g:20,life:1.2,size:.18,colors:['#9bd1ff','#fff','#5aa9ff']});
+const doDust=(x,y,n)=>burst(x,y,n||12,{spread:1.2,up:1.4,g:4,life:.6,size:.13,colors:['#8d99ae']});
+const doConfetti=()=>burst(WD.buzzer.x,WD.buzzer.y,130,{spread:4.5,up:8,g:5,life:2.4,size:.13,colors:WD.buzzer.gold?['#ffe17e','#fff','#ffc300','#e8a812']:['#e63946','#ffc300','#fff','#4cc9f0','#80ed99']});
+function updateParts(dt){for(let i=parts.length-1;i>=0;i--){const p=parts[i];
+  p.life-=dt;if(p.life<=0){parts.splice(i,1);continue;}
+  p.vy-=p.g*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;}}
+function drawParts(){for(let i=0;i<parts.length;i++){const p=parts[i];
+  ctx.globalAlpha=clamp(p.life/p.life0,0,1);ctx.fillStyle=p.color;
+  ctx.beginPath();ctx.arc(sx(p.x),sy(p.y),p.size*SCALE,0,TAU);ctx.fill();}
+  ctx.globalAlpha=1;}
+
+/* ================= PHYSICS ================= */
+function updateSinks(dt){
+  for(let i=0;i<WD.plats.length;i++){const p=WD.plats[i];if(!p.sink)continue;
+    const on=(G.state==='RUN'&&P.grounded&&G.groundIdx===i);
+    const rate=p.sink.rate*diffMul(1.25);
+    p.sunk=clamp((p.sunk||0)+(on?rate:-p.sink.rec)*dt,0,1.1);
+    p.y=p.baseY-p.sunk;
+  }
+  /* tilting tables */
+  for(const p of WD.plats){
+    if(!p.tilt)continue;
+    const on=(G.state==='RUN'&&P.grounded&&P.groundIdx>=0&&WD.plats[G.groundIdx]===p);
+    const centerX=(p.x0+p.x1)/2;
+    if(on){
+      const target=clamp((P.x-centerX)*p.tilt.factor,-p.tilt.max,p.tilt.max);
+      p.tilt.current+=(target-p.tilt.current)*Math.min(1,dt*3);
+    }else{
+      p.tilt.current+=(0-p.tilt.current)*Math.min(1,dt*p.tilt.rest);
+    }
+  }
+  /* keep the wheel turning when nobody is riding it */
+  if(WD.ferris&&G.state!=='FERRIS')WD.ferris.angle+=WD.ferris.speed*dt;
+}
+function physRun(dt){
+  const inp=inputX();
+  const k=P.grounded?1-Math.exp(-12*dt):1-Math.exp(-2.2*dt);
+  P.vx=lerp(P.vx,inp*MAXV,k);
+  if(inp!==0)P.dir=inp>0?1:-1;
+  if(jumpEdge){G.jumpBuf=0.15;jumpEdge=false;}else G.jumpBuf=Math.max(0,G.jumpBuf-dt);
+  if(G.jumpBuf>0&&G.coyote>0){P.vy=JUMPV;G.coyote=0;G.jumpBuf=0;P.grounded=false;Sfx.jump();}
+  P.vy+=GRAV*dt;
+  G.onLog=!!(WD.log&&P.grounded&&P.x>WD.log.x0&&P.x<WD.log.x1&&Math.abs(P.y-0.75-WD.log.top)<0.06);
+  if(G.onLog){
+    G.drag=2.4+0.6*Math.sin(G.envT*0.9)+0.3*Math.sin(G.envT*2.3);
+    P.x-=G.drag*dt;
+  }
+  G.logSpin+=(G.onLog?G.drag:1.1)*dt;
+  P.x+=P.vx*dt;
+  /* wall seal */
+  G.bonk=false;
+  if(WD.wall&&P.y<WD.topY+0.45&&P.x>WD.wall.x-0.15&&!(P.grounded&&P.vx>=WD.wall.entry)){
+    P.x=WD.wall.x-0.15;
+    if(P.vx>0){P.vx=0;G.bonk=true;}
+  }
+  for(const c of WD.clamps){
+    if(P.y>c.y0&&P.y<(c.y1||8)&&P.x>c.x0-3&&P.x<(c.x1||c.x0+3))P.x=clamp(P.x,c.x0,c.x1||c.x0);}
+  P.x=clamp(P.x,0.3,WD.width);
+  /* tilt slide — the tables are see-saws: your side dips and you slide down it.
+     Tuned so standing still off-center dumps you in ~5-10s while a fast
+     crossing exits before the tilt develops. */
+  if(P.grounded&&G.groundIdx>=0){
+    const p=WD.plats[G.groundIdx];
+    if(p&&p.tilt)P.vx+=Math.sin(p.tilt.current)*22*dt;
+  }
+  const prevFeet=P.y-0.75;
+  G.prevY=P.y;
+  P.y+=P.vy*dt;
+  const feet=P.y-0.75;
+  const gr=groundBelow(P.x,prevFeet+0.31);
+  let landed=false;
+  if(gr.y>-1e8&&feet<=gr.y&&prevFeet>=gr.y-0.001){
+    const plat=WD.plats[gr.i];
+    if(plat&&plat.bounce){
+      P.y=gr.y+0.75;P.vy=16;P.vx=Math.max(Math.abs(P.vx),5.5);P.dir=1;
+      P.grounded=false;Sfx.boing();doDust(P.x,gr.y);G.shake=0.1;
+      return;
+    }
+    P.y=gr.y+0.75;
+    if(P.vy<-9){Sfx.land(clamp(-P.vy/16,.2,1));doDust(P.x,gr.y);}
+    P.vy=0;landed=true;G.groundIdx=gr.i;
+  }else if(P.grounded&&P.vy<=0.01&&gr.y>-1e8&&feet<=gr.y+0.05&&feet>=gr.y-0.35&&WD.plats[gr.i]&&WD.plats[gr.i].tilt){
+    /* stay glued to a tilting surface while walking its slope */
+    P.y=gr.y+0.75;P.vy=0;landed=true;G.groundIdx=gr.i;
+  }
+  P.grounded=landed;
+  G.coyote=landed?0.12:Math.max(0,G.coyote-dt);
+  const hsp=Math.abs(P.vx);G.hspSm=lerp(G.hspSm,hsp,1-Math.exp(-6*dt));
+  if(landed&&hsp>1){const p0=G.runPhase;G.runPhase+=hsp*dt*2.2;
+    if(Math.floor(p0/Math.PI)!==Math.floor(G.runPhase/Math.PI))Sfx.step();}
+  if(landed&&hsp>6&&Math.random()<dt*6)doDust(P.x-0.2,P.y-0.7,2);
+}
+
+function zoneUI(){
+  const x=P.x,y=P.y,sp=Math.abs(P.vx);
+  hideMeter();balWrap.style.display='none';steerHintEl.textContent='';
+  if(y<2.6&&x>WD.uiGauge[0]&&x<WD.uiGauge[1]){
+    speedGauge.style.display='flex';
+    spdFill.style.width=(clamp(sp/8,0,1)*100)+'%';
+    /* hard mode asks for a fuller sprint, but the gauge can never demand
+       more than the player's physical top speed */
+    if(sp>=Math.min(WD.wall.ready+diffSub(0.3),MAXV-0.1)){spdFill.classList.add('ready');spdState.textContent='FULL SPRINT — GO!';spdState.classList.add('ready');}
+    else{spdFill.classList.remove('ready');spdState.classList.remove('ready');spdState.textContent='SPRINT — HOLD \u2192';}
+  }else speedGauge.style.display='none';
+  if(P.y>WD.buzzer.y-1.5&&P.y<WD.buzzer.y+1.5&&Math.abs(P.x-WD.buzzer.x)<2.5){
+    setPrompt(WD.buzzer.gold?'HIT THE <b style="color:#ffe17e">GOLDEN BUZZER!</b>':'HIT THE <b style="color:#ff4d5e">BUZZER!</b>');return;}
+  if(WD.wall&&y<WD.topY-0.4&&x>WD.wall.x-0.6){
+    if(G.bonk)setPrompt('RUN BACK, THEN SPRINT AT THE WALL!','bad');
+    else setPrompt('CHARGE THE WALL!');
+    return;}
+  if(WD.log&&y<3&&x>37.6&&x<44.7){
+    if(G.onLog){balWrap.style.display='flex';
+      balMarker.style.left=(clamp((P.x-WD.log.x0)/(WD.log.x1-WD.log.x0),0,1)*100)+'%';
+      steerHintEl.innerHTML=devicePrompt('HOLD <span class="kbd">&#8594;</span> — THE ROLLER DRAGS YOU \u2190');
+      setPrompt('CROSS THE LOG!');}
+    else if(x<41.8)setPrompt('JUMP ONTO THE ROLLING LOG — <span class="kbd">SPACE</span>');
+    else setPrompt('JUMP TO THE PLATFORM — <span class="kbd">SPACE</span>');
+    return;}
+  for(const z of WD.prompts){
+    if(x>z.x0&&x<z.x1&&(!z.y0||y>z.y0)&&(!z.y1||y<z.y1)){setPrompt(z.t);return;}
+  }
+  setPrompt('SPRINT WITH <span class="kbd">&#8594;</span> — JUMP WITH <span class="kbd">SPACE</span>');
+}
+
+function stRun(dt){
+  physRun(dt);
+  /* rolling log red ends — the advertised danger zones are lethal */
+  if(WD.log&&G.onLog&&(P.x<WD.log.x0+0.45||P.x>WD.log.x1-0.45)){enterFail();return;}
+  if(WD.wall&&P.x>=WD.wall.x-0.12&&P.y<WD.topY-0.3&&P.grounded&&P.vx>=WD.wall.entry){enterWall();return;}
+  if(G.bonk&&!G.warned){G.warned=true;Sfx.bonk();flash('TOO SLOW — RUN BACK AND SPRINT!',true);}
+  if(P.x<WD.wall.x-2.5)G.warned=false;
+  G.noGrabT=Math.max(0,G.noGrabT-dt);
+  if(!P.grounded){
+    let got=null;
+    for(const g of WD.grabs){
+      if(G.t<=(g.coolT||0))continue;
+      if((g.seq||0)>G.ropeDone)continue;
+      const gy=g.kind==='bar'?g.ay:g.ay-g.L;
+      if(Math.hypot(P.x-g.ax,P.y-gy)<g.grabR&&P.y>g.yMin&&P.y<g.ay+0.2){got=g;break;}
+    }
+    if(got){enterHang(got);return;}
+  }
+  if(!P.grounded&&G.noGrabT<=0){
+    if(WD.salmon&&Math.hypot(P.x-WD.salmon.cx,P.y-WD.salmon.rungs[0])<WD.salmon.grabR){enterSalmon();return;}
+    if(WD.zip&&Math.hypot(P.x-WD.zip.x0,P.y-WD.zip.y0)<WD.zip.grabR){enterZip();return;}
+    /* Ferris wheel */
+    if(WD.ferris){
+      for(let k=0;k<4;k++){
+        const ha=WD.ferris.angle+k*Math.PI/2;
+        const hx=WD.ferris.cx+WD.ferris.r*Math.cos(ha);
+        const hy=WD.ferris.cy-WD.ferris.r*Math.sin(ha);
+        if(Math.hypot(P.x-hx,P.y-hy)<WD.ferris.grabR){enterFerris(k);return;}
+      }
+    }
+    if(WD.rope&&Math.abs(P.x-WD.rope.x)<0.55&&P.y>WD.rope.y0+0.85&&P.y<WD.rope.y1-0.5){enterRope();return;}
+    let ch=false;
+    for(const c of WD.cliffs){
+      if(P.x>=c.x0-0.35&&P.x<=c.x1-0.3&&P.y>=c.y-1.3&&P.y<=c.y+1.35){enterCliff(c);ch=true;break;}
+    }
+    if(ch)return;
+    if(P.vy<0){
+      /* swept band test — a fast fall can't tunnel through the catch zone */
+      const lo=Math.min(P.y,G.prevY),hi=Math.max(P.y,G.prevY);
+      for(const L of WD.ledges){
+        if(P.x>=L.x0-0.12&&P.x<=L.x0+0.6&&hi>=L.y-0.9&&lo<=L.y-0.3){enterLedge(L);return;}
+      }
+    }
+  }
+  for(const m of WD.ms){
+    if(G.milestone<m.idx&&P.grounded&&P.x>m.x&&P.y>m.y0&&P.y<m.y1){setMilestone(m.idx,m.label);break;}
+  }
+  for(let i=0;i<WD.cards.length;i++){
+    if(!G.cards[i]&&P.x>WD.cards[i].at){G.cards[i]=true;showCard(i);}
+  }
+  if(P.grounded&&P.x>=WD.buzzer.x-0.55&&P.y>WD.buzzer.y-1.4){enterWin();return;}
+  if(P.y<-0.25||(P.grounded&&P.y-0.75<-0.12)){enterFail();return;}
+  zoneUI();
+}
+
+/* ---- HANG ---- */
+function enterHang(g){
+  G.state='HANG';G.hangItem=g;G.grip=GRIPMAX;G.wasWin=false;P.dir=1;
+  const d=Math.hypot(P.x-g.ax,g.ay-P.y);
+  if(g.kind==='bar') G.hl=clamp(d,1.05,1.55);
+  else G.hl=clamp(d,1.8,3.6);
+  G.hθ=Math.atan2(P.x-g.ax,g.ay-P.y);
+  G.hw=(P.vx*Math.cos(G.hθ)+P.vy*Math.sin(G.hθ))/G.hl;
+  Sfx.grab();G.shake=0.1;G.cheer=Math.max(G.cheer,0.35);
+}
+function releaseHang(boost){
+  const g=G.hangItem;
+  const vx=G.hl*Math.cos(G.hθ)*G.hw,vy=G.hl*Math.sin(G.hθ)*G.hw;
+  G.state='RUN';G.noGrabT=0.35;G.hangItem=null;
+  g.coolT=G.t+1.5;
+  if(g.kind==='rope')G.ropeDone=Math.max(G.ropeDone,(g.seq||0)+1);
+  P.vx=vx+(boost?g.boost[0]:0);P.vy=vy+(boost?g.boost[1]:0);P.grounded=false;
+  Sfx.release();hideMeter();
+}
+function stHang(dt){
+  if(jumpEdge){jumpEdge=false;releaseHang(true);return;}
+  jumpEdge=false;
+  const g=G.hangItem;
+  G.hw+=(GRAV/G.hl)*Math.sin(G.hθ)*dt;
+  G.hw*=1-0.08*dt;
+  const sp=Math.abs(G.hw);
+  if(Math.abs(G.hθ)<1.0&&sp<3.2){G.hw+=(sp>0.4?Math.sign(G.hw):1)*1.6*dt;}
+  G.hθ+=G.hw*dt;G.grip-=dt*diffMul(1.25);
+  P.x=g.ax+G.hl*Math.sin(G.hθ);
+  P.y=g.ay-G.hl*Math.cos(G.hθ);
+  P.vx=0;P.vy=0;
+  if(G.grip<=0){releaseHang(false);return;}
+  showFill('GRIP',G.grip/GRIPMAX,G.grip<2.5);
+  const win=G.hθ>=0.3&&G.hθ<=1.0&&G.hw>0;
+  if(win&&!G.wasWin){G.wasWin=true;Sfx.ping();}
+  if(!win&&G.hθ<0.1)G.wasWin=false;
+  if(win)setPrompt('RELEASE NOW — <span class="kbd">SPACE</span>!','good');
+  else setPrompt('SWING FORWARD… WAIT FOR THE <b style="color:#43d17a">GREEN FLASH</b>');
+}
+
+/* ---- FERRIS WHEEL (NEW mechanic) ---- */
+function enterFerris(handle){
+  G.state='FERRIS';G.ferHandle=handle;G.ferGrip=WD.ferris.grip;G.ferBuf=0;P.dir=1;
+  Sfx.grab();G.shake=0.1;G.cheer=Math.max(G.cheer,0.3);
+}
+function stFerris(dt){
+  if(jumpEdge){jumpEdge=false;G.ferBuf=0.15;}
+  const wantJump=G.ferBuf>0;
+  G.ferBuf=Math.max(0,G.ferBuf-dt);
+  const f=WD.ferris;
+  f.angle+=f.speed*dt;
+  G.ferGrip-=dt*diffMul(1.3);
+  const ha=f.angle+G.ferHandle*Math.PI/2;
+  const hx=f.cx+f.r*Math.cos(ha),hy=f.cy-f.r*Math.sin(ha);
+  P.x=hx;P.y=hy;P.vx=0;P.vy=0;
+  const atTop=hy>f.cy+f.r*0.85&&hx>=f.cx; /* past the apex moving forward — every release lands on the platform */
+  if(wantJump&&atTop){
+    G.ferBuf=0;
+    G.state='RUN';G.noGrabT=0.5;
+    const vx=-f.r*Math.sin(ha)*f.speed,vy=-f.r*Math.cos(ha)*f.speed;
+    P.vx=vx+f.boost[0];P.vy=vy+f.boost[1];P.grounded=false;P.dir=1;
+    Sfx.release();hideMeter();G.cheer=0.8;
+    return;
+  }
+  if(G.ferGrip<=0){G.state='RUN';G.noGrabT=0.5;P.vy=-1;P.vx=0;hideMeter();flash('GRIP GONE!',true);return;}
+  showFill('GRIP',G.ferGrip/f.grip,G.ferGrip<2);
+  if(atTop)setPrompt('RELEASE NOW — <span class="kbd">SPACE</span>!','good');
+  else setPrompt('RIDE UP THE WHEEL — <span class="kbd">SPACE</span> AT THE TOP');
+}
+
+/* ---- SALMON LADDER ---- */
+function enterSalmon(){
+  G.state='SALMON';G.hadLadder=true;G.salRung=0;G.salPhase='hang';G.salHop=0;G.grip=WD.salmon.grip;
+  G.salGreen=false;G.salBuf=0;P.dir=1;
+  P.x=WD.salmon.cx;P.y=WD.salmon.rungs[0]-1.2;
+  Sfx.grab();G.cheer=Math.max(G.cheer,0.4);
+}
+function salmonFall(){
+  G.state='RUN';G.noGrabT=0.8;P.vx=0.5;P.vy=-1;P.grounded=false;hideMeter();
+}
+function stSalmon(dt){
+  const s=WD.salmon;
+  if(G.salPhase==='hang'){
+    G.grip-=dt*diffMul(1.25);
+    if(G.grip<=0){salmonFall();return;}
+    G.salM=0.5+0.5*Math.sin(G.envT*s.spd);
+    const g0=s.green[0],g1=s.green[1];
+    const inG=G.salM>=g0&&G.salM<=g1;
+    if(inG&&!G.salGreen){G.salGreen=true;Sfx.ping();}
+    if(!inG)G.salGreen=false;
+    showSalmon(G.salM,g0,g1);
+    /* press buffering mirrors the ground jump: an early press waits 0.15s
+       for the green window instead of instantly dropping you */
+    if(jumpEdge){jumpEdge=false;G.salBuf=0.15;}
+    const hadBuf=G.salBuf>0;
+    G.salBuf=Math.max(0,G.salBuf-dt);
+    if(inG&&hadBuf){
+      G.salBuf=0;G.salPhase='hop';G.salHop=0;G.salFrom=s.rungs[G.salRung];Sfx.hop();G.cheer=Math.max(G.cheer,0.5);
+    }else if(hadBuf&&G.salBuf<=0){
+      Sfx.bonk();flash('MISSED THE BAR!',true);salmonFall();return;
+    }else{
+      if(G.grip<2.5)setPrompt('HURRY — <b style="color:#ff4d5e">GRIP FAILING!</b>','bad');
+      else setPrompt('PRESS <span class="kbd">SPACE</span> IN THE <b style="color:#43d17a">GREEN ZONE</b>!');
+      return;
+    }
+  }
+  if(G.salPhase==='hop'){
+    jumpEdge=false;
+    G.salHop+=dt/0.45;
+    const t=Math.min(G.salHop,1);
+    const barY=lerp(G.salFrom,s.rungs[G.salRung+1],smooth(t));
+    P.x=s.cx;P.y=barY-1.2;P.vx=0;P.vy=0;
+    setPrompt('UP!','good');
+    if(t>=1){
+      G.salRung++;
+      if(G.salRung>=s.rungs.length-1){
+        G.state='RUN';G.noGrabT=0.8;
+        P.x=s.cx;P.y=s.rungs[s.rungs.length-1]-1.2;
+        P.vx=s.dismount[0];P.vy=s.dismount[1];P.grounded=false;
+        Sfx.release();Sfx.cheer(0.8);G.cheer=1;hideMeter();
+      }else G.salPhase='hang';
+    }
+  }
+}
+
+/* ---- ZIPLINE ---- */
+function enterZip(){
+  G.state='ZIP';G.zipS=0;G.zipV=WD.zip.v0;P.dir=1;
+  Sfx.grab();Sfx.zip();G.cheer=Math.max(G.cheer,0.4);
+}
+function releaseZip(){
+  const z=WD.zip;
+  const len=Math.hypot(z.x1-z.x0,z.y1-z.y0);
+  const t=clamp(G.zipS/len,0,1);
+  const cx=lerp(z.x0,z.x1,t),cy=lerp(z.y0,z.y1,t);
+  const dx=(z.x1-z.x0)/len,dy=(z.y1-z.y0)/len;
+  G.state='RUN';G.noGrabT=0.5;
+  P.x=cx;P.y=cy-1.35;P.vx=dx*G.zipV;P.vy=dy*G.zipV+2.2;P.grounded=false;P.dir=1;
+  Sfx.release();
+}
+function stZip(dt){
+  const z=WD.zip;
+  const len=Math.hypot(z.x1-z.x0,z.y1-z.y0);
+  G.zipV+=z.acc*dt;G.zipS+=G.zipV*dt;
+  if(jumpEdge||G.zipS>=len){jumpEdge=false;releaseZip();return;}
+  const t=clamp(G.zipS/len,0,1);
+  P.x=lerp(z.x0,z.x1,t);P.y=lerp(z.y0,z.y1,t)-1.35;P.vx=0;P.vy=0;
+  setPrompt('HOLD ON!','good');
+}
+
+/* ---- CLIFFHANGER ---- */
+function enterCliff(c){
+  G.state='CLIFF';G.cCliff=c;G.cGrip=c.grip*diffGrip();G.cGripMax=G.cGrip;G.cCrux=false;
+  P.x=clamp(P.x,c.x0+0.15,c.x1-0.5);P.dir=1;P.vx=0;P.vy=0;
+  Sfx.grab();G.shake=0.08;
+}
+function stCliff(dt){
+  const c=G.cCliff;
+  const inC=P.x>c.crux.x0&&P.x<c.crux.x1;
+  const inC2=c.crux2&&P.x>c.crux2.x0&&P.x<c.crux2.x1;
+  if((inC||inC2)&&!G.cCrux){G.cCrux=true;flash('CRUX!',true);Sfx.scrape();}
+  if(!inC&&!inC2)G.cCrux=false;
+  const spd=inC?c.crux.spd:(inC2&&c.crux2?c.crux2.spd:c.spd);
+  const drain=(inC?c.crux.drain:(inC2&&c.crux2?c.crux2.drain:c.drain))*diffMul(1.25);
+  const inp=inputX();
+  if(inp!==0){P.x+=inp*spd*dt;P.dir=inp>0?1:-1;G.runPhase+=spd*dt*3;}
+  P.x=clamp(P.x,c.x0+0.1,c.x1);
+  P.y+=(c.y-1.05-P.y)*Math.min(1,dt*12);
+  P.vx=0;P.vy=0;
+  G.cGrip-=drain*dt;
+  if(G.cGrip<=0){G.state='RUN';G.noGrabT=0.5;P.vx=0;P.vy=0;P.grounded=false;hideMeter();flash('GRIP GONE!',true);return;}
+  showFill('GRIP',G.cGrip/G.cGripMax,G.cGrip/G.cGripMax<0.3);
+  if(P.x>=c.x1-0.12){
+    hideMeter();
+    enterLedge({x0:c.x1-0.2,y:c.y},true);
+    return;
+  }
+  if(inC||inC2)setPrompt('CRUX — <b style="color:#ff4d5e">GRIP DRAINING!</b> HOLD \u2192','bad');
+  else setPrompt('TRAVERSE — HOLD \u2192');
+}
+
+/* ---- ROPE CLIMB ---- */
+function enterRope(){
+  G.state='ROPE';G.ropeStr=100;G.ropeLast=null;G.ropeGrace=0.6;P.dir=1;
+  P.x=WD.rope.x;P.vx=0;P.vy=0;P.grounded=false;
+  Sfx.grab();G.cheer=Math.max(G.cheer,0.5);
+}
+function climbTap(d){
+  if(G.state!=='ROPE')return;
+  G.ropeGrace=0;
+  if(d!==G.ropeLast){
+    G.ropeLast=d;P.y+=0.34;G.ropeStr=Math.min(100,G.ropeStr+6);
+    G.runPhase+=1.4;Sfx.step();
+  }else G.ropeStr=Math.min(100,G.ropeStr+2);
+}
+function ropeDrop(msg){
+  G.state='RUN';G.noGrabT=0.5;P.vy=-1;P.vx=0;hideMeter();
+  flash(msg,true);Sfx.aww();
+}
+function stRope(dt){
+  const drain=WD.n===6?16:13;
+  G.ropeStr-=drain*dt;
+  G.ropeGrace=Math.max(0,G.ropeGrace-dt);
+  if(G.ropeGrace<=0)P.y-=0.45*dt; /* no slide during the grab grace */
+  P.x=WD.rope.x;
+  if(G.ropeStr<=0){ropeDrop('STRENGTH GONE — CLIMB AGAIN!');return;}
+  if(P.y<WD.rope.y0+0.8){ropeDrop('SLID OFF — JUMP AND GRAB AGAIN!');return;}
+  if(P.y>=WD.rope.y1-0.55){
+    hideMeter();
+    G.state='CLIMB';G.ct=0;G.cfx=P.x;G.cfy=P.y;G.ctx2=WD.rope.px;G.cty2=WD.rope.y1+0.75;
+    setMilestone(WD.ropeMs||WD.obstacles.length-2,'ROPE CLIMB — SUMMIT!');
+    Sfx.grab();Sfx.cheer(1);G.cheer=1.2;return;
+  }
+  showFill('STRENGTH',G.ropeStr/100,G.ropeStr<30);
+  setPrompt('TAP <span class="kbd">\u2190</span><span class="kbd">\u2192</span> ALTERNATELY — CLIMB!');
+}
+
+/* ---- LEDGE GRAB ---- */
+function enterLedge(L,fromCliff){
+  G.state='LEDGE';G.ledge=L;G.lt=0;
+  P.x=clamp(P.x,L.x0+0.05,L.x0+0.45);
+  P.y=clamp(P.y,L.y-0.8,L.y-0.35);
+  G.ledgeFrom={x:P.x,y:P.y};
+  P.vx=0;P.vy=0;P.dir=1;
+  Sfx.grab();
+  if(!fromCliff){flash('LEDGE GRAB!');G.cheer=0.9;G.shake=0.08;}
+  hideMeter();
+}
+function stLedge(dt){
+  G.lt+=dt/0.7;
+  const L=G.ledge,t=Math.min(G.lt,1);
+  if(t<0.5){
+    P.x=G.ledgeFrom.x;P.y=G.ledgeFrom.y+Math.sin(G.envT*6)*0.02;
+    setPrompt(G.cCliff?'PULLING UP…':'CAUGHT THE LEDGE!','good');
+  }else{
+    const k=(t-0.5)/0.5,e=smooth(k);
+    P.x=lerp(G.ledgeFrom.x,L.x0+0.55,e);
+    P.y=lerp(G.ledgeFrom.y,L.y+0.75,e);
+    setPrompt('PULLING UP…','good');
+  }
+  if(t>=1){G.state='RUN';P.grounded=true;P.y=L.y+0.75;P.x=L.x0+0.6;G.cCliff=null;}
+}
+
+/* ---- WARPED WALL ---- */
+function enterWall(){
+  G.state='WALL';G.ws=0;G.slide=false;
+  G.wv0=Math.max(P.vx,WD.wall.entry);G.wv=G.wv0;P.dir=1;
+  Sfx.release();G.cheer=0.7;
+  hideMeter();balWrap.style.display='none';steerHintEl.textContent='';speedGauge.style.display='none';
+}
+function enterClimb(fx,fy,tx,ty){
+  G.state='CLIMB';G.ct=0;G.cfx=fx;G.cfy=fy;G.ctx2=tx;G.cty2=ty;
+  setMilestone(WD.wallMs,'WARPED WALL — UP TOP!');Sfx.grab();G.cheer=1;
+}
+function stWall(dt){
+  const al=wallSlope(clamp(G.ws,0,1)),arc=wallArc(clamp(G.ws,0,1));
+  if(!G.slide){
+    const v2=G.wv0*G.wv0+2*WD.wall.leg*G.ws-2*WGRAV*WD.wall.h*Math.pow(clamp(G.ws,0,1),1.7);
+    if(v2<=0.0001&&G.ws>0.02){
+      G.slide=true;G.wv=0;Sfx.scrape();G.shake=0.15;
+      flash('SLIPPING — RUN BACK AND RETRY!',true);
+    }else{
+      G.wv=Math.sqrt(Math.max(v2,0.0001));
+      G.ws+=G.wv*dt/arc;
+      if(G.ws>=WALL_LUNGE){
+        const p=wallT(WALL_LUNGE);
+        enterClimb(p.x,p.y+0.75,WD.wall.x+3.8,WD.topY+0.75);return;
+      }
+    }
+  }else{
+    G.wv=Math.max(G.wv-WGRAV*Math.sin(al)*dt,-7);
+    G.ws+=G.wv*dt/arc;
+    if(Math.random()<dt*24)doDust(P.x,P.y-0.7,2);
+  }
+  if(G.ws<=0){
+    G.state='RUN';P.x=WD.wall.x-0.2;P.y=1.25;P.vx=-2;P.vy=0;P.grounded=true;return;
+  }
+  const p=wallT(clamp(G.ws,0,1));
+  P.x=p.x;P.y=p.y+0.75;P.vx=0;P.vy=0;
+  G.runPhase+=Math.abs(G.wv)*dt*2.2;
+  if(G.slide)setPrompt('SLIDING BACK…','bad');
+  else setPrompt('GO! GO! GO!','good');
+}
+function stClimb(dt){
+  G.ct+=dt/0.45;const t=Math.min(G.ct,1),k=1-Math.pow(1-t,3);
+  P.x=lerp(G.cfx,G.ctx2,k);P.y=lerp(G.cfy,G.cty2,k);P.vx=0;P.vy=0;
+  setPrompt('GRAB THE LEDGE!','good');
+  if(t>=1){G.state='RUN';P.grounded=true;Sfx.cheer(0.9);G.cheer=1.1;}
+}
+
+/* ---- FAIL / WIN ---- */
+function enterFail(){
+  G.state='FAIL';G.failT=0;G.splashed=false;G.failShown=false;G.timeScale=0.32;G.shake=0.15;
+  G.failCam=P.x;
+  const x=P.x;
+  let z=WD.failZones[WD.failZones.length-1];
+  for(const f of WD.failZones){if(x<f.x1){z=f;break;}}
+  G.failName=z.name;G.failTip=z.tip;
+  if(z.name==='THE SALMON LADDER'&&G.hadLadder)G.failTip='Press SPACE only when the marker is in the GREEN zone!';
+  hidePrompt();hideMeter();balWrap.style.display='none';steerHintEl.textContent='';speedGauge.style.display='none';
+}
+function stFail(dt,rdt){
+  G.failT+=rdt;
+  if(G.failT>0.7)G.timeScale=lerp(G.timeScale,1,1-Math.exp(-3*rdt));
+  P.vy+=GRAV*dt*0.6;P.x+=P.vx*dt*0.3;P.y+=P.vy*dt;
+  if(P.y<-1)P.y+=Math.sin(G.envT*2.2)*0.012;
+  if(P.y<-4)P.vy=Math.max(P.vy,-0.4);
+  if(P.y<0.05&&!G.splashed){G.splashed=true;
+    doSplash(P.x);flash('SPLASHED OUT!',true);Sfx.splash();Sfx.aww();G.cheer=0.7;G.shake=0.4;}
+  if(G.failT>1.3&&!G.failShown){G.failShown=true;
+    $('failObs').textContent='YOU FELL AT '+G.failName;
+    $('failTip').innerHTML=devicePrompt(G.failTip);show($('failOv'));}
+}
+function enterWin(){
+  G.state='WIN';G.winT=0;G.winShown=false;G.bursts=[0.1,0.6,1.2,1.8];
+  P.x=Math.min(P.x,WD.buzzer.x);P.y=WD.buzzer.y-0.6;P.vx=0;P.vy=0;P.grounded=true;P.dir=1;
+  Sfx.buzzer();Sfx.cheer(1.5);if(WD.buzzer.gold)Sfx.fanfare();
+  G.cheer=1.6;G.shake=0.25;
+  setMilestone(WD.obstacles.length,'BUZZER!');
+  flash(WD.buzzer.gold?'TOTAL VICTORY!':'COURSE CLEARED!');
+  const t=G.runTime,b=getBest(WD.n);
+  G.newBest=(b==null||t<b);
+  if(G.newBest)setBest(WD.n,t);
+  if(WD.n<6&&getUnlock()<WD.n+1)setUnlock(WD.n+1);
+  hidePrompt();hideMeter();balWrap.style.display='none';steerHintEl.textContent='';speedGauge.style.display='none';
+}
+function stWin(dt,rdt){
+  G.winT+=rdt;
+  while(G.bursts.length&&G.winT>G.bursts[0]){G.bursts.shift();doConfetti();}
+  if(G.winT>1.8&&!G.winShown){G.winShown=true;
+    $('winTitle').textContent=WD.buzzer.gold?'TOTAL VICTORY!':'COURSE CLEARED!';
+    $('winTitle').className='bigT '+(WD.buzzer.gold?'gold':'yellow');
+    $('winTime').textContent=fmtTime(G.runTime);
+    $('winBest').textContent=G.newBest?'NEW STAGE RECORD!':'STAGE RECORD — '+fmtTime(getBest(WD.n));
+    if(WD.n<6)show($('nextBtn'));else hide($('nextBtn'));
+    show($('winOv'));}
+}
+
+/* ---- stage loading / respawn ---- */
+function loadStage(n){
+  WD=buildStage(n);
+  for(const p of WD.plats){if(p.sink){p.baseY=p.y;p.sunk=0;}}
+  verifySpawns();
+  G.state='RUN';G.timeScale=1;G.timerStarted=false;G.runTime=0;G.milestone=0;
+  G.cards=WD.cards.map(()=>false);G.ropeDone=0;
+  G.grip=GRIPMAX;G.noGrabT=0;G.hadLadder=false;G.splashed=false;G.failShown=false;G.winShown=false;
+  G.warned=false;G.slide=false;G.coyote=0;G.jumpBuf=0;jumpEdge=false;
+  G.shake=0;G.hspSm=0;G.cheer=0.5;G.onLog=false;G.hangItem=null;G.cCliff=null;G.groundIdx=-1;
+  P.x=WD.spawn.x;P.y=WD.spawn.y;P.vx=0;P.vy=0;P.grounded=true;P.dir=1;
+  parts.length=0;
+  buildCrowd();
+  camX=clamp(P.x-viewW*0.35,-0.5,WD.width-viewW+0.5);camY=-2.2;
+  G.paused=false;hide($('failOv'));hide($('winOv'));hide($('title'));hide($('settingsOv'));hide($('pauseOv'));show($('hud'));
+  buildProgress();updateProgress();
+  stageTag.textContent='STAGE '+n+' · '+WD.meta.name;
+  timerEl.textContent=fmtTime(0);
+  timerEl.style.display=SET.timerOn?'block':'none';
+  hideMeter();balWrap.style.display='none';steerHintEl.textContent='';speedGauge.style.display='none';
+  setPrompt('SPRINT WITH <span class="kbd">&#8594;</span> — JUMP WITH <span class="kbd">SPACE</span>');
+}
+function retryCheckpoint(){
+  const cp=WD.cp[Math.min(G.milestone,WD.cp.length-1)];
+  G.state='RUN';G.timeScale=1;G.splashed=false;G.failShown=false;G.ropeDone=0;
+  G.grip=GRIPMAX;G.noGrabT=0;G.warned=false;G.slide=false;G.hangItem=null;G.cCliff=null;
+  G.coyote=0;G.jumpBuf=0;jumpEdge=false;G.shake=0;G.hspSm=0;G.onLog=false;G.groundIdx=-1;
+  P.x=cp.x;P.y=cp.y;P.vx=0;P.vy=0;P.grounded=true;P.dir=1;
+  G.paused=false;hide($('failOv'));hide($('winOv'));hide($('pauseOv'));
+  updateProgress();
+  hideMeter();balWrap.style.display='none';steerHintEl.textContent='';speedGauge.style.display='none';
+  setPrompt('SPRINT WITH <span class="kbd">&#8594;</span>!');
+}
+
+/* ================= SPECTATORS / SKY ================= */
+const PALETTE=['#e63946','#ffc300','#2a9d8f','#9b5de5','#f15bb5','#00bbf9','#00f5d4','#ee6c4d','#d9ed92','#f1faee','#4cc9f0','#ffe66d'];
+const CROWD_X0=-8,CROWD_TOP=5.2;
+let crowdFar=[],crowdNear=[],stars=[],glints=[],TOWERS=[],crowdFarCv=null,crowdNearCv=null;
+/* Crowd layers are pre-rendered once to offscreen canvases and blitted per frame
+   (parallax slice + unified bounce) — removes ~1,400 fillRect calls per frame. */
+function bakeCrowd(list,baseColor){
+  const cv=document.createElement('canvas');
+  cv.width=Math.max(1,Math.ceil((WD.width+12-CROWD_X0)*SCALE));
+  cv.height=Math.max(1,Math.ceil((CROWD_TOP+1.3)*SCALE));
+  const c=cv.getContext('2d');
+  const PX=x=>(x-CROWD_X0)*SCALE,PY=y=>(CROWD_TOP-y)*SCALE;
+  const base=list[0].y,step=list.length>1?list[1].y-list[0].y:0.62;
+  c.fillStyle=baseColor;
+  c.fillRect(0,PY(base+0.12),cv.width,PY(-0.6)-PY(base+0.12));
+  for(let r=0;r<4;r++){
+    c.fillStyle=r%2?'#0d1222':'#0c101d';
+    c.fillRect(0,PY(base+r*step+0.66),cv.width,0.7*SCALE);
+  }
+  for(const b of list){
+    c.fillStyle=b.c;
+    c.fillRect(PX(b.x)-0.14*SCALE*b.s,PY(b.y)-0.34*SCALE*b.s,0.28*SCALE*b.s,0.4*SCALE*b.s);
+    c.fillStyle='#c9a27e';
+    c.fillRect(PX(b.x)-0.08*SCALE*b.s,PY(b.y)-0.48*SCALE*b.s,0.16*SCALE*b.s,0.16*SCALE*b.s);
+  }
+  return cv;
+}
+function buildCrowd(){
+  crowdFar=[];crowdNear=[];glints=[];
+  for(let r=0;r<4;r++)for(let x=-8;x<WD.width+10;x+=0.62)
+    crowdFar.push({x:x+rand(-.15,.15),y:1.1+r*0.62,c:PALETTE[(Math.random()*12)|0],ph:rand(0,TAU),s:rand(.8,1.1)});
+  for(let r=0;r<4;r++)for(let x=-8;x<WD.width+10;x+=0.66)
+    crowdNear.push({x:x+rand(-.15,.15),y:1.7+r*0.68,c:PALETTE[(Math.random()*12)|0],ph:rand(0,TAU),s:rand(.85,1.2)});
+  for(let i=0;i<44;i++){const src=Math.random()<0.5?crowdFar:crowdNear;
+    const b=src[(Math.random()*src.length)|0];glints.push({x:b.x,y:b.y+0.4,ph:rand(0,TAU)});}
+  TOWERS=[];for(let x=2;x<WD.width;x+=15)TOWERS.push(x);
+  TOWERS.push(WD.width-3);
+  crowdFarCv=bakeCrowd(crowdFar,'#090d18');
+  crowdNearCv=bakeCrowd(crowdNear,'#0b0f1c');
+}
+stars=[];for(let i=0;i<130;i++)stars.push({x:Math.random(),y:Math.random()*0.55,ph:rand(0,TAU),s:rand(0.6,1.6)});
+
+/* ================= RENDER ================= */
+let skyGrad=null,skyGradKey='';
+let coneGrad=null,coneGradKey='';
+let waterGrad=null,waterGradKey='',reflGrad=null,reflGradKey='';
+let heroGlow=null,buzzGrad=null,buzzGradKey='';
+function drawSky(t){
+  const th=WD.meta.theme;
+  const key=WD.n+'|'+H;
+  if(skyGradKey!==key){
+    skyGrad=ctx.createLinearGradient(0,0,0,H);
+    skyGrad.addColorStop(0,th.sky[0]);skyGrad.addColorStop(0.55,th.sky[1]);skyGrad.addColorStop(1,th.sky[2]);
+    skyGradKey=key;
+  }
+  ctx.fillStyle=skyGrad;ctx.fillRect(0,0,W,H);
+  for(const s of stars){
+    ctx.globalAlpha=0.35+0.3*Math.sin(t*1.5+s.ph);
+    ctx.fillStyle='#cfe0ff';
+    ctx.fillRect(s.x*W,s.y*H,s.s,s.s);
+  }
+  ctx.globalAlpha=1;
+  ctx.fillStyle='#e8f0ff';ctx.beginPath();ctx.arc(W*0.82,H*0.12,26,0,TAU);ctx.fill();
+  ctx.fillStyle=th.sky[0];ctx.beginPath();ctx.arc(W*0.82-10,H*0.12-6,22,0,TAU);ctx.fill();
+}
+function drawCrowdLayer(pf,t,cv){
+  if(!cv)return;
+  const wob=(0.03+G.cheer*0.22)*Math.sin(t*2.3)*SCALE;
+  const srcX=clamp((camX*pf-CROWD_X0)*SCALE,0,Math.max(0,cv.width-W));
+  ctx.drawImage(cv,srcX,0,W,cv.height,0,H+SCALE*(camY-CROWD_TOP)+wob,W,cv.height);
+  for(const gp of glints){
+    const x=(gp.x-camX*pf)*SCALE;if(x<0||x>W)continue;
+    const y=H-(gp.y-camY)*SCALE;
+    ctx.globalAlpha=0.25+0.25*Math.sin(t*3+gp.ph);
+    ctx.fillStyle='#fff';ctx.fillRect(x,y,2,2);
+  }
+  ctx.globalAlpha=1;
+}
+function drawTowers(t){
+  const th=WD.meta.theme;
+  const coneKey=WD.n+'|'+H+'|'+Math.round(camY*8);
+  if(coneGradKey!==coneKey){
+    coneGrad=ctx.createLinearGradient(0,sy(9),0,sy(0.5));
+    coneGrad.addColorStop(0,th.cone+'0.12)');coneGrad.addColorStop(1,th.cone+'0)');
+    coneGradKey=coneKey;
+  }
+  for(const x of TOWERS){
+    const px=sx(x);if(px<-80||px>W+80)continue;
+    ctx.fillStyle='#232a3d';
+    ctx.fillRect(px-0.55*SCALE,sy(0.4),1.1*SCALE,sy(-1.1)-sy(0.4));
+    ctx.fillStyle='#39415a';
+    ctx.fillRect(px-0.15*SCALE,sy(9),0.3*SCALE,sy(-0.5)-sy(9));
+    ctx.fillStyle='#fff3cf';
+    ctx.fillRect(px-0.8*SCALE,sy(9.2),1.6*SCALE,0.5*SCALE);
+    ctx.fillStyle=coneGrad;
+    ctx.beginPath();
+    ctx.moveTo(px,sy(9));ctx.lineTo(px-2.4*SCALE,sy(0.5));ctx.lineTo(px+2.4*SCALE,sy(0.5));
+    ctx.closePath();ctx.fill();
+  }
+}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function drawSign(cx,cy,text){
+  const px=sx(cx),py=sy(cy);if(px<-300||px>W+300)return;
+  const w=4.8*SCALE,h=0.85*SCALE;
+  ctx.strokeStyle='rgba(120,130,160,.5)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(px-w*0.3,py);ctx.lineTo(px-w*0.42,py-6.5*SCALE);
+  ctx.moveTo(px+w*0.3,py);ctx.lineTo(px+w*0.42,py-6.5*SCALE);ctx.stroke();
+  ctx.fillStyle='#0e1223';rr(px-w/2,py-h/2,w,h,4);ctx.fill();
+  ctx.strokeStyle='#ffc300';ctx.lineWidth=2;rr(px-w/2,py-h/2,w,h,4);ctx.stroke();
+  ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.font='italic 900 '+(0.36*SCALE)+'px "Arial Black",Arial';
+  ctx.fillText(text,px,py+1);
+}
+function drawCourse(t){
+  if(WD.wall){
+    ctx.beginPath();ctx.moveTo(sx(WD.wall.x),sy(0.5));
+    for(let s=0;s<=1.001;s+=0.08){const p=wallT(s);ctx.lineTo(sx(p.x),sy(p.y));}
+    ctx.lineTo(sx(WD.wall.x+3),sy(0.5));ctx.closePath();
+    ctx.fillStyle='#141828';ctx.fill();
+    ctx.beginPath();ctx.moveTo(sx(WD.wall.x),sy(0.5));
+    for(let s=0;s<=1.001;s+=0.08){const p=wallT(s);ctx.lineTo(sx(p.x),sy(p.y));}
+    ctx.strokeStyle='#ffc300';ctx.lineWidth=0.42*SCALE;ctx.lineCap='round';ctx.stroke();
+    ctx.strokeStyle='#d62839';ctx.lineWidth=0.2*SCALE;
+    ctx.beginPath();ctx.moveTo(sx(WD.wall.x),sy(0.5));ctx.lineTo(sx(WD.wall.x),sy(WD.topY+0.2));ctx.stroke();
+  }
+  let nextPad=null;
+  for(const p of WD.plats){if(p.pad&&p.x0>P.x-0.6){nextPad=p;break;}}
+  for(const p of WD.plats){
+    if(p.x1<camX-2||p.x0>camX+viewW+2)continue;
+    if(p.log)continue;
+    /* TILT visual — board rotates exactly with the physics angle, on a center fulcrum */
+    if(p.tilt){
+      const centerX=(p.x0+p.x1)/2;
+      ctx.fillStyle='#39415a';
+      ctx.beginPath();
+      ctx.moveTo(sx(centerX-0.5),sy(p.y-0.1));ctx.lineTo(sx(centerX+0.5),sy(p.y-0.1));
+      ctx.lineTo(sx(centerX),sy(-1.2));ctx.closePath();ctx.fill();
+      ctx.save();
+      ctx.translate(sx(centerX),sy(p.y));
+      /* canvas y is down-positive: rotate(+tilt) dips the RIGHT end,
+         matching groundBelow's py = y - tan(tilt)*(x-center) */
+      ctx.rotate(p.tilt.current);
+      const halfW=(p.x1-p.x0)/2*SCALE;
+      ctx.fillStyle='#2a3a5c';
+      ctx.fillRect(-halfW,0,halfW*2,0.36*SCALE);
+      ctx.fillStyle='#e9edf5';
+      ctx.fillRect(-halfW,0,halfW*2,0.06*SCALE);
+      ctx.fillStyle='rgba(255,77,94,0.85)';
+      ctx.fillRect(-halfW,0,0.2*SCALE,0.36*SCALE);
+      ctx.fillRect(halfW-0.2*SCALE,0,0.2*SCALE,0.36*SCALE);
+      ctx.restore();
+      continue;
+    }
+    const isPad=!!p.pad;
+    ctx.fillStyle='#10141f';
+    const legs=p.x1-p.x0>4?[p.x0+0.3,p.x0+(p.x1-p.x0)/2,p.x1-0.3]:[p.x0+0.3,p.x1-0.3];
+    const legTo=p.legTo!=null?p.legTo:-1.3;
+    for(const lx of legs)ctx.fillRect(sx(lx)-0.08*SCALE,sy(p.y),0.16*SCALE,sy(legTo)-sy(p.y));
+    if(p.bounce){
+      ctx.fillStyle='#2a5fd6';
+      rr(sx(p.x0),sy(p.y),(p.x1-p.x0)*SCALE,0.3*SCALE,3);ctx.fill();
+      ctx.strokeStyle='#9bd1ff';ctx.lineWidth=2;
+      for(const bx of[p.x0+0.4,(p.x0+p.x1)/2,p.x1-0.4]){
+        ctx.beginPath();ctx.moveTo(sx(bx),sy(p.y)-2);
+        ctx.lineTo(sx(bx)-0.12*SCALE,sy(p.y)-0.22*SCALE);
+        ctx.lineTo(sx(bx)+0.12*SCALE,sy(p.y)-0.38*SCALE);
+        ctx.fillStyle='#2a5fd6';ctx.strokeStyle='#9bd1ff';ctx.stroke();
+      }
+      continue;
+    }
+    ctx.fillStyle=isPad?(p.bridge?'#3a4258':'#ffc300'):'#1d2130';
+    ctx.fillRect(sx(p.x0),sy(p.y),(p.x1-p.x0)*SCALE,0.36*SCALE);
+    if(isPad){
+      ctx.fillStyle=p.bridge?'#ff4d5e':'#d62839';
+      ctx.fillRect(sx(p.x0),sy(p.y),0.28*SCALE,0.36*SCALE);
+      ctx.fillRect(sx(p.x1)-0.28*SCALE,sy(p.y),0.28*SCALE,0.36*SCALE);
+      if(p.sink&&p.sunk>0.02){
+        ctx.globalAlpha=0.3+0.2*Math.sin(t*10);
+        ctx.fillStyle='#7db8e8';
+        ctx.fillRect(sx(p.x0),sy(p.y)+0.3*SCALE,(p.x1-p.x0)*SCALE,0.08*SCALE);
+        ctx.globalAlpha=1;
+      }
+    }else{
+      ctx.fillStyle='rgba(255,255,255,0.08)';
+      ctx.fillRect(sx(p.x0),sy(p.y),(p.x1-p.x0)*SCALE,0.05*SCALE);
+      ctx.fillStyle='#d62839';
+      ctx.fillRect(sx(p.x0),sy(p.y),0.2*SCALE,0.1*SCALE);
+      ctx.fillRect(sx(p.x1)-0.2*SCALE,sy(p.y),0.2*SCALE,0.1*SCALE);
+    }
+    if(p.chev){
+      ctx.fillStyle='#571620';
+      ctx.fillRect(sx(p.chev[0]),sy(p.y),(p.chev[1]-p.chev[0])*SCALE,0.1*SCALE);
+      ctx.fillStyle='#ffe66d';
+      for(let cx2=p.chev[0];cx2<p.chev[1];cx2+=1.15){
+        const px=sx(cx2),py=sy(p.y+0.36);
+        ctx.beginPath();ctx.moveTo(px-0.14*SCALE,py-0.2*SCALE);
+        ctx.lineTo(px+0.12*SCALE,py);ctx.lineTo(px-0.14*SCALE,py+0.2*SCALE);
+        ctx.lineTo(px-0.04*SCALE,py);ctx.closePath();ctx.fill();
+      }
+    }
+    if(isPad&&p===nextPad&&!p.bridge){
+      ctx.globalAlpha=0.45+0.35*Math.sin(t*6);
+      ctx.strokeStyle='#ffe66d';ctx.lineWidth=3;
+      rr(sx(p.x0)-3,sy(p.y)-3,(p.x1-p.x0)*SCALE+6,0.36*SCALE+6,4);ctx.stroke();
+      ctx.globalAlpha=1;
+      const ax=sx((p.x0+p.x1)/2),ay=sy(p.y+1.6+Math.sin(t*5)*0.15);
+      ctx.fillStyle='#ffe66d';
+      ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(ax-0.22*SCALE,ay-0.3*SCALE);
+      ctx.lineTo(ax+0.22*SCALE,ay-0.3*SCALE);ctx.closePath();ctx.fill();
+    }
+  }
+  if(WD.log){
+    const L=WD.log,x0=L.x0,x1=L.x1,top=L.top,bot=L.bot;
+    ctx.fillStyle='#39415a';
+    ctx.fillRect(sx(x0+0.25)-0.09*SCALE,sy(bot),0.18*SCALE,sy(-1.2)-sy(bot));
+    ctx.fillRect(sx(x1-0.25)-0.09*SCALE,sy(bot),0.18*SCALE,sy(-1.2)-sy(bot));
+    rr(sx(x0),sy(top),(x1-x0)*SCALE,(top-bot)*SCALE,0.28*SCALE);
+    ctx.fillStyle='#141828';ctx.fill();
+    ctx.save();ctx.clip();
+    const period=0.95,off=G.logSpin%period;
+    for(let x=x0-period-off;x<x1+period;x+=period){
+      ctx.fillStyle='#d62839';
+      ctx.beginPath();
+      ctx.moveTo(sx(x),sy(top));ctx.lineTo(sx(x+0.45),sy(top));
+      ctx.lineTo(sx(x+0.05),sy(bot));ctx.lineTo(sx(x-0.4),sy(bot));
+      ctx.closePath();ctx.fill();
+    }
+    ctx.fillStyle='rgba(255,77,94,0.8)';
+    ctx.fillRect(sx(x0),sy(top),0.45*SCALE,(top-bot)*SCALE);
+    ctx.fillRect(sx(x1)-0.45*SCALE,sy(top),0.45*SCALE,(top-bot)*SCALE);
+    ctx.restore();
+    rr(sx(x0),sy(top),(x1-x0)*SCALE,(top-bot)*SCALE,0.28*SCALE);
+    ctx.strokeStyle='#d62839';ctx.lineWidth=0.12*SCALE;ctx.stroke();
+    if(P.x>x0-0.6&&P.x<x1+0.6&&P.y<3){
+      ctx.globalAlpha=0.5+0.3*Math.sin(t*5);
+      ctx.fillStyle='#ff8c42';
+      for(let k2=0;k2<2;k2++){
+        const ax=sx((x0+x1)/2-1.1+k2*2.2),ay=sy(2.1+Math.sin(t*4+k2)*0.12);
+        ctx.beginPath();ctx.moveTo(ax-0.3*SCALE,ay);
+        ctx.lineTo(ax+0.1*SCALE,ay-0.2*SCALE);ctx.lineTo(ax+0.1*SCALE,ay+0.2*SCALE);
+        ctx.closePath();ctx.fill();
+      }
+      ctx.globalAlpha=1;
+    }
+  }
+  for(const g of WD.grabs){
+    if(g.kind==='bar'){
+      ctx.fillStyle='#39415a';
+      ctx.fillRect(sx(g.px[0])-0.09*SCALE,sy(g.ay+0.3),0.18*SCALE,sy(-1.2)-sy(g.ay+0.3));
+      ctx.fillRect(sx(g.px[1])-0.09*SCALE,sy(g.ay+0.3),0.18*SCALE,sy(-1.2)-sy(g.ay+0.3));
+      ctx.fillStyle='#d62839';
+      ctx.fillRect(sx(g.px[0]-0.2),sy(g.ay+0.35),(g.px[1]-g.px[0]+0.4)*SCALE,0.22*SCALE);
+      ctx.save();
+      rr(sx(g.bx0),sy(g.ay)-0.14*SCALE,(g.bx1-g.bx0)*SCALE,0.28*SCALE,0.14*SCALE);ctx.clip();
+      const off=(G.logSpin*1.3)%0.6;
+      for(let x=g.bx0-0.6+off;x<g.bx1;x+=0.6){
+        ctx.fillStyle=(Math.round((x-g.bx0+off)/0.6)%2===0)?'#e9edf5':'#d62839';
+        ctx.fillRect(sx(x),sy(g.ay)-0.14*SCALE,0.3*SCALE,0.28*SCALE);
+      }
+      ctx.restore();
+    }else{
+      let ex=g.ax,ey=g.ay-g.L;
+      if(G.state==='HANG'&&G.hangItem===g){
+        ex=g.ax+g.L*Math.sin(G.hθ);
+        ey=g.ay-g.L*Math.cos(G.hθ);
+      }
+      ctx.strokeStyle='#c9b08a';ctx.lineWidth=0.09*SCALE;ctx.lineCap='round';
+      ctx.beginPath();ctx.moveTo(sx(g.ax),sy(g.ay));ctx.lineTo(sx(ex),sy(ey));ctx.stroke();
+      ctx.fillStyle='#c9b08a';ctx.beginPath();ctx.arc(sx(ex),sy(ey),0.11*SCALE,0,TAU);ctx.fill();
+    }
+  }
+  if(WD.ropeBeam){
+    const b=WD.ropeBeam;
+    ctx.fillStyle='#39415a';
+    ctx.fillRect(sx(b.x0+0.3)-0.09*SCALE,sy(b.y),0.18*SCALE,sy(-1.2)-sy(b.y));
+    ctx.fillRect(sx(b.x1-0.3)-0.09*SCALE,sy(b.y),0.18*SCALE,sy(-1.2)-sy(b.y));
+    ctx.fillStyle='#232a3d';
+    ctx.fillRect(sx(b.x0),sy(b.y),(b.x1-b.x0)*SCALE,0.26*SCALE);
+  }
+  /* FERRIS WHEEL */
+  if(WD.ferris){
+    const f=WD.ferris;
+    ctx.strokeStyle='#232a3d';ctx.lineWidth=0.16*SCALE;
+    ctx.beginPath();ctx.moveTo(sx(f.cx),sy(f.cy));ctx.lineTo(sx(f.cx-1.1),sy(0.2));
+    ctx.moveTo(sx(f.cx),sy(f.cy));ctx.lineTo(sx(f.cx+1.1),sy(0.2));ctx.stroke();
+    ctx.strokeStyle='#39415a';ctx.lineWidth=0.12*SCALE;
+    ctx.beginPath();ctx.arc(sx(f.cx),sy(f.cy),f.r*SCALE,0,TAU);ctx.stroke();
+    ctx.strokeStyle='#232a3d';
+    for(let k=0;k<4;k++){
+      const ha=f.angle+k*Math.PI/2;
+      ctx.beginPath();
+      ctx.moveTo(sx(f.cx),sy(f.cy));
+      ctx.lineTo(sx(f.cx+f.r*Math.cos(ha)),sy(f.cy-f.r*Math.sin(ha)));
+      ctx.stroke();
+    }
+    for(let k=0;k<4;k++){
+      const ha=f.angle+k*Math.PI/2;
+      const hx=f.cx+f.r*Math.cos(ha),hy=f.cy-f.r*Math.sin(ha);
+      const onHandle=(G.state==='FERRIS'&&G.ferHandle===k);
+      ctx.fillStyle=onHandle?'#43d17a':'#ffc300';
+      ctx.beginPath();ctx.arc(sx(hx),sy(hy),(onHandle?0.17:0.13)*SCALE,0,TAU);ctx.fill();
+      if(onHandle){
+        ctx.strokeStyle='#fff';ctx.lineWidth=2.5;
+        ctx.beginPath();ctx.arc(sx(hx),sy(hy),0.22*SCALE,0,TAU);ctx.stroke();
+      }
+    }
+  }
+  if(WD.salmon){
+    const s=WD.salmon;
+    ctx.fillStyle='#39415a';
+    ctx.fillRect(sx(s.railL)-0.11*SCALE,sy(s.top),0.22*SCALE,sy(-1.2)-sy(s.top));
+    ctx.fillRect(sx(s.railR)-0.11*SCALE,sy(s.top),0.22*SCALE,sy(-1.2)-sy(s.top));
+    ctx.fillStyle='#232a3d';
+    ctx.fillRect(sx(s.railL),sy(s.top),(s.railR-s.railL)*SCALE,0.2*SCALE);
+    for(const ry of s.rungs){
+      ctx.fillStyle='#0c101d';
+      ctx.fillRect(sx(s.railL),sy(ry)-0.06*SCALE,(s.railR-s.railL)*SCALE,0.12*SCALE);
+    }
+    let barY=s.rungs[Math.min(G.salRung,s.rungs.length-1)];
+    if(G.state==='SALMON'&&G.salPhase==='hop')
+      barY=lerp(G.salFrom,s.rungs[G.salRung+1]||barY,smooth(Math.min(G.salHop,1)));
+    else if(G.state!=='SALMON')barY=s.rungs[0];
+    ctx.save();
+    rr(sx(s.railL),sy(barY)-0.11*SCALE,(s.railR-s.railL)*SCALE,0.22*SCALE,0.11*SCALE);ctx.clip();
+    const off=(G.logSpin*1.5)%0.5;
+    for(let x=s.railL-0.5+off;x<s.railR;x+=0.5){
+      ctx.fillStyle=(Math.round((x-s.railL+off)/0.5)%2===0)?'#e9edf5':'#d62839';
+      ctx.fillRect(sx(x),sy(barY)-0.11*SCALE,0.25*SCALE,0.22*SCALE);
+    }
+    ctx.restore();
+  }
+  for(const c of WD.cliffs){
+    ctx.fillStyle='#1a1f33';
+    rr(sx(c.x0),sy(c.y+0.55),(c.x1-c.x0)*SCALE,0.55*SCALE,3);ctx.fill();
+    ctx.fillStyle='#0e1223';
+    for(let x=c.x0+0.3;x<c.x1-0.2;x+=0.7)
+      ctx.fillRect(sx(x),sy(c.y+0.5),0.32*SCALE,0.2*SCALE);
+    ctx.fillStyle='#ffc300';
+    ctx.fillRect(sx(c.x0),sy(c.y),(c.x1-c.x0)*SCALE,0.09*SCALE);
+    ctx.fillStyle='#ff4d5e';
+    ctx.fillRect(sx(c.crux.x0),sy(c.y),(c.crux.x1-c.crux.x0)*SCALE,0.09*SCALE);
+    if(c.crux2)ctx.fillRect(sx(c.crux2.x0),sy(c.y),(c.crux2.x1-c.crux2.x0)*SCALE,0.09*SCALE);
+    ctx.globalAlpha=0.22+0.12*Math.sin(t*6);
+    ctx.fillStyle='#ff4d5e';
+    ctx.fillRect(sx(c.crux.x0),sy(c.y),(c.crux.x1-c.crux.x0)*SCALE,0.55*SCALE);
+    if(c.crux2)ctx.fillRect(sx(c.crux2.x0),sy(c.y),(c.crux2.x1-c.crux2.x0)*SCALE,0.55*SCALE);
+    ctx.globalAlpha=1;
+  }
+  if(WD.zip){
+    const z=WD.zip;
+    ctx.fillStyle='#39415a';
+    ctx.fillRect(sx(z.x0)-0.09*SCALE,sy(z.y0+0.3),0.18*SCALE,sy(-1.2)-sy(z.y0+0.3));
+    ctx.fillRect(sx(z.x1)-0.09*SCALE,sy(z.y1+0.3),0.18*SCALE,sy(-1.2)-sy(z.y1+0.3));
+    ctx.strokeStyle='#8d99ae';ctx.lineWidth=0.05*SCALE;
+    ctx.beginPath();ctx.moveTo(sx(z.x0),sy(z.y0));ctx.lineTo(sx(z.x1),sy(z.y1));ctx.stroke();
+    let px=z.x0,py=z.y0;
+    if(G.state==='ZIP'){
+      const len=Math.hypot(z.x1-z.x0,z.y1-z.y0);
+      const tt=clamp(G.zipS/len,0,1);
+      px=lerp(z.x0,z.x1,tt);py=lerp(z.y0,z.y1,tt);
+    }
+    ctx.fillStyle='#ffc300';
+    ctx.beginPath();ctx.arc(sx(px),sy(py),0.14*SCALE,0,TAU);ctx.fill();
+    ctx.strokeStyle='#c9b08a';ctx.lineWidth=0.07*SCALE;
+    ctx.beginPath();ctx.moveTo(sx(px),sy(py));ctx.lineTo(sx(px),sy(py+0.4));ctx.stroke();
+    ctx.fillStyle='#e9edf5';
+    ctx.fillRect(sx(px)-0.18*SCALE,sy(py+0.4),0.36*SCALE,0.1*SCALE);
+  }
+  if(WD.rope){
+    const r=WD.rope;
+    ctx.fillStyle='#39415a';
+    ctx.fillRect(sx(r.beam.x0+0.2)-0.07*SCALE,sy(r.beam.y),0.14*SCALE,sy(r.y1+0.1)-sy(r.beam.y));
+    ctx.fillRect(sx(r.beam.x1-0.2)-0.07*SCALE,sy(r.beam.y),0.14*SCALE,sy(r.y1+0.1)-sy(r.beam.y));
+    ctx.fillStyle='#232a3d';
+    ctx.fillRect(sx(r.beam.x0),sy(r.beam.y),(r.beam.x1-r.beam.x0)*SCALE,0.26*SCALE);
+    let by=r.y0+1.2;
+    if(G.state==='ROPE')by=P.y+0.95;
+    ctx.strokeStyle='#c9b08a';ctx.lineWidth=0.1*SCALE;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(sx(r.x),sy(r.beam.y));ctx.lineTo(sx(r.x),sy(by));ctx.stroke();
+    ctx.fillStyle='#c9b08a';ctx.beginPath();ctx.arc(sx(r.x),sy(by),0.12*SCALE,0,TAU);ctx.fill();
+  }
+  {
+    const B=WD.buzzer,gold=B.gold;
+    const postBot=WD.rope?WD.rope.y1+0.1:WD.topY;
+    ctx.fillStyle='#39415a';
+    ctx.fillRect(sx(B.x-1.2)-0.07*SCALE,sy(B.y+1.35),0.14*SCALE,sy(postBot)-sy(B.y+1.35));
+    ctx.fillRect(sx(B.x+1.2)-0.07*SCALE,sy(B.y+1.35),0.14*SCALE,sy(postBot)-sy(B.y+1.35));
+    ctx.fillStyle=gold?'#241a00':'#0e1223';
+    rr(sx(B.x-1.6),sy(B.y+1.35),3.2*SCALE,1.9*SCALE,4);ctx.fill();
+    ctx.strokeStyle=gold?'#ffe17e':'#e63946';ctx.lineWidth=2;
+    rr(sx(B.x-1.6),sy(B.y+1.35),3.2*SCALE,1.9*SCALE,4);ctx.stroke();
+    ctx.fillStyle=gold?'#ffe17e':'#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='italic 900 '+(0.36*SCALE)+'px "Arial Black",Arial';
+    ctx.fillText(gold?'TOTAL VICTORY':'NINJA',sx(B.x),sy(B.y+0.75));
+    const bx=sx(B.x),by=sy(B.y);
+    const bg2key=WD.n+'|'+H+'|'+Math.round(camY*8);
+    if(buzzGradKey!==bg2key){
+      buzzGrad=ctx.createLinearGradient(0,sy(B.y+6),0,sy(B.y+0.35));
+      buzzGrad.addColorStop(0,'rgba(255,215,94,0)');buzzGrad.addColorStop(1,'rgba(255,215,94,1)');
+      buzzGradKey=bg2key;
+    }
+    ctx.globalAlpha=0.14+0.07*Math.sin(t*3);
+    ctx.fillStyle=buzzGrad;ctx.fillRect(bx-0.25*SCALE,sy(B.y+6),0.5*SCALE,sy(B.y+0.35)-sy(B.y+6));
+    ctx.globalAlpha=1;
+    const pulse=0.75+0.25*Math.sin(t*5);
+    ctx.fillStyle=gold?'#ffd60a':'#ff2d3f';
+    ctx.beginPath();ctx.arc(bx,by,0.36*SCALE,0,TAU);ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.arc(bx,by,0.5*SCALE*pulse,0,TAU);ctx.stroke();
+    ctx.fillStyle='#39415a';
+    ctx.fillRect(bx-0.06*SCALE,by+0.3*SCALE,0.12*SCALE,0.6*SCALE);
+  }
+  /* subtle railings so the tower clamps read as physical fences */
+  for(const c of WD.clamps){
+    if(c.x1==null||c.x1<=c.x0)continue;
+    ctx.strokeStyle='rgba(190,205,235,0.22)';ctx.lineWidth=0.05*SCALE;
+    ctx.beginPath();
+    ctx.moveTo(sx(c.x0),sy(c.y0));ctx.lineTo(sx(c.x0),sy(c.y1));
+    ctx.moveTo(sx(c.x1),sy(c.y0));ctx.lineTo(sx(c.x1),sy(c.y1));
+    ctx.moveTo(sx(c.x0),sy(c.y1));ctx.lineTo(sx(c.x1),sy(c.y1));
+    ctx.stroke();
+  }
+  drawSign(0.2,3.1,'STAGE '+WD.n+' · '+WD.meta.name);
+  for(const s of WD.signs)drawSign(s.x,s.y,s.t);
+}
+function drawShadow(){
+  if(G.state==='FAIL'||G.state==='WIN')return;
+  const gr=groundBelow(P.x,P.y);
+  if(gr.y>-1e8){
+    const d=P.y-0.75-gr.y;
+    if(d<3){
+      ctx.globalAlpha=0.28*(1-d/3);
+      ctx.fillStyle='#000';
+      ctx.beginPath();
+      ctx.ellipse(sx(P.x),sy(gr.y+0.03),0.3*SCALE*(1-d*0.12),0.07*SCALE,0,0,TAU);
+      ctx.fill();ctx.globalAlpha=1;
+    }
+  }else if(P.y>0.3){
+    ctx.globalAlpha=0.22+0.1*Math.sin(G.envT*6);
+    ctx.strokeStyle='#7db8e8';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.ellipse(sx(P.x),sy(0.02),0.34*SCALE,0.08*SCALE,0,0,TAU);ctx.stroke();
+    ctx.globalAlpha=1;
+  }
+}
+function drawWater(t){
+  const th=WD.meta.theme;
+  ctx.beginPath();
+  const step=0.35,x0=camX-0.5,x1=camX+viewW+0.5;
+  ctx.moveTo(sx(x0),sy(0));
+  for(let x=x0;x<=x1;x+=step){
+    const y=Math.sin(x*1.3+t*2)*0.05+Math.sin(x*0.7-t*1.3)*0.04;
+    ctx.lineTo(sx(x),sy(y));
+  }
+  ctx.lineTo(sx(x1),H);ctx.lineTo(sx(x0),H);ctx.closePath();
+  const wkey=WD.n+'|'+H+'|'+Math.round(camY*8);
+  if(waterGradKey!==wkey){
+    waterGrad=ctx.createLinearGradient(0,sy(0.3),0,H);
+    waterGrad.addColorStop(0,th.waterA);waterGrad.addColorStop(1,th.waterB);
+    waterGradKey=wkey;
+  }
+  ctx.fillStyle=waterGrad;ctx.fill();
+  ctx.strokeStyle=th.surf;ctx.lineWidth=1.5;
+  ctx.beginPath();
+  for(let x=x0;x<=x1;x+=step){
+    const y=Math.sin(x*1.3+t*2)*0.05+Math.sin(x*0.7-t*1.3)*0.04;
+    if(x===x0)ctx.moveTo(sx(x),sy(y));else ctx.lineTo(sx(x),sy(y));
+  }
+  ctx.stroke();
+  const rkey=WD.n+'|'+H+'|'+Math.round(camY*8);
+  if(reflGradKey!==rkey){
+    reflGrad=ctx.createLinearGradient(0,sy(0),0,sy(-1.6));
+    reflGrad.addColorStop(0,'rgba('+th.refl+',1)');reflGrad.addColorStop(1,'rgba('+th.refl+',0)');
+    reflGradKey=rkey;
+  }
+  for(const lx of TOWERS.concat([WD.buzzer.x])){
+    const px=sx(lx);if(px<-30||px>W+30)continue;
+    ctx.globalAlpha=0.14+0.05*Math.sin(t*2.5+lx);
+    ctx.fillStyle=reflGrad;ctx.fillRect(px-0.2*SCALE,sy(0),0.4*SCALE,sy(-1.6)-sy(0));
+  }
+  ctx.globalAlpha=1;
+}
+/* ---------- HERO ---------- */
+function limb(x1,y1,x2,y2,w,c,bend){
+  ctx.strokeStyle=c;ctx.lineWidth=w;ctx.lineCap='round';
+  const mx=(x1+x2)/2,my=(y1+y2)/2;
+  const dx=x2-x1,dy=y2-y1,l=Math.hypot(dx,dy)||1;
+  const nx=-dy/l,ny=dx/l,b=bend||0;
+  ctx.beginPath();ctx.moveTo(x1,y1);
+  ctx.quadraticCurveTo(mx+nx*b,my+ny*b,x2,y2);ctx.stroke();
+}
+function drawHero(t){
+  const px=sx(P.x),py=sy(P.y);
+  if(px<-100||px>W+100)return;
+  ctx.save();
+  ctx.translate(px,py);
+  ctx.scale(SCALE,SCALE);
+  if(!heroGlow){
+    heroGlow=ctx.createRadialGradient(0,0,0.1,0,0,1.4);
+    heroGlow.addColorStop(0,'rgba(255,220,160,0.25)');heroGlow.addColorStop(1,'rgba(255,220,160,0)');
+  }
+  ctx.fillStyle=heroGlow;ctx.beginPath();ctx.arc(0,0,1.4,0,TAU);ctx.fill();
+
+  const RED='#e63946',WHITE='#f2f5fb',SKIN='#f1c27d',YELLOW='#ffc300',DARKRED='#b51d2e';
+  let rot=0,dir=P.dir;
+  let aL=[-0.3,0.1],aR=[0.3,0.1],lL=[-0.15,0.78],lR=[0.15,0.78];
+  let aBend=0.07,lBend=0.06;
+  const ph=G.runPhase;
+  if(G.state==='FAIL'){
+    dir=1;rot=t*8;
+    aL=[Math.sin(t*9)*0.4,0.2];aR=[Math.sin(t*8+2)*0.4,0.25];
+    lL=[Math.sin(t*10+1)*0.4,0.5];lR=[Math.sin(t*9+3)*0.4,0.55];
+  }else if(G.state==='HANG'){
+    rot=-G.hθ;dir=1;
+    const hy=-Math.min(G.hl-0.22,1.35);
+    aL=[-0.11,hy];aR=[0.11,hy];
+    lL=[Math.sin(t*2.5)*0.18-0.05,0.68];lR=[Math.sin(t*2.5+1.4)*0.18+0.05,0.72];
+  }else if(G.state==='FERRIS'){
+    dir=1;
+    ctx.translate(0,1.15); /* body hangs below the handle — hands land on the grip point */
+    aL=[-0.14,-1.18];aR=[0.14,-1.18];
+    const c=Math.sin(t*10);
+    lL=[c*0.25,0.5];lR=[-c*0.25,0.55];
+  }else if(G.state==='SALMON'){
+    dir=1;
+    aL=[-0.11,-1.1];aR=[0.11,-1.1];
+    const k=G.salHop;
+    lL=[Math.sin(t*6)*0.15-0.05,0.5+k*0.15];lR=[Math.sin(t*6+1.4)*0.15+0.05,0.55+k*0.15];
+  }else if(G.state==='ZIP'){
+    dir=1;
+    aL=[-0.12,-1.2];aR=[0.12,-1.2];
+    lL=[-0.28,0.62+Math.sin(t*9)*0.05];lR=[-0.1,0.7];
+  }else if(G.state==='CLIFF'){
+    dir=1;
+    aL=[-0.14,-0.92];aR=[0.14,-0.92];
+    const c=Math.sin(ph);
+    lL=[c*0.3,0.72];lR=[-c*0.3,0.75];
+  }else if(G.state==='ROPE'){
+    dir=1;
+    const c=Math.sin(ph*1.4);
+    aL=[-0.16,lerp(-0.6,-1.1,(c+1)/2)];aR=[0.16,lerp(-1.1,-0.6,(c+1)/2)];
+    lL=[-0.16,0.45];lR=[0.16,0.5];
+  }else if(G.state==='LEDGE'){
+    dir=1;
+    const hy=clamp(P.y-(G.ledge.y+0.08),-1.0,-0.3);
+    if(G.lt>0.5){const k=Math.min(1,(G.lt-0.5)/0.5);
+      aL=[-0.13-0.1*k,hy*(1-k)-0.2*k];aR=[0.16,hy*(1-k)-0.12*k];
+      lL=[-0.12,0.5];lR=[0.14,0.42];
+    }else{
+      aL=[-0.13,hy];aR=[0.13,hy];
+      lL=[Math.sin(t*3)*0.1-0.06,0.72];lR=[Math.sin(t*3+1)*0.1+0.06,0.75];
+    }
+  }else if(G.state==='WALL'){
+    const s=clamp(G.ws,0,1),al=wallSlope(s);
+    const arcv=wallArc(s);
+    const Tx=3/arcv,Ty=1.7*WD.wall.h*Math.pow(Math.max(s,0.001),0.7)/arcv;
+    rot=Math.atan2(-Ty,Tx);dir=1;
+    if(G.slide){
+      aL=[-0.3,-0.75];aR=[0.34,-0.7];
+      lL=[-0.2,0.6];lR=[0.1,0.66];
+    }else{
+      const c=Math.sin(t*20);
+      aL=[-0.25+c*0.3,-0.55];aR=[0.25-c*0.3,-0.5];
+      lL=[-0.1-c*0.3,0.55];lR=[0.1+c*0.3,0.6];
+    }
+  }else if(G.state==='CLIMB'){
+    dir=1;
+    const k=Math.min(G.ct,1);
+    aL=[-0.3-lerp(0,0.2,k),-0.9];aR=[0.3+lerp(0.3,0.1,k),lerp(0,-0.8,k)];
+    lL=[-0.2,0.6];lR=[0.15,0.65];
+  }else if(G.state==='WIN'){
+    dir=1;
+    aL=[-0.4+Math.sin(t*8)*0.08,-0.95];aR=[0.4+Math.sin(t*8+1)*0.08,-0.95];
+    lL=[-0.12,0.76];lR=[0.12,0.76];
+  }else if(!P.grounded){
+    aL=[-0.34,-0.45];aR=[0.3,0.05];
+    lL=[-0.1,0.5];lR=[0.18,0.66];
+  }else if(G.hspSm>0.8){
+    const s1=Math.sin(ph),s2=Math.sin(ph+Math.PI);
+    aL=[s2*0.36,-0.02];aR=[s1*0.36,-0.02];
+    lL=[s1*0.42,0.78-Math.max(0,Math.cos(ph))*0.22];
+    lR=[s2*0.42,0.78-Math.max(0,Math.cos(ph+Math.PI))*0.22];
+    rot=0.045+0.06*Math.min(1,G.hspSm/8);
+  }else{
+    const br=Math.sin(t*2)*0.02;
+    aL=[-0.22,0.05+br];aR=[0.22,0.05-br];
+    lL=[-0.14,0.78];lR=[0.14,0.78];
+  }
+  ctx.rotate(rot);
+  ctx.scale(dir,1);
+  limb(-0.06,0.30,lL[0],lL[1],0.15,DARKRED,lBend);
+  limb(-0.14,-0.30,aL[0],aL[1],0.12,'#c9cedd',aBend);
+  limb(0,0.30,0,-0.32,0.36,RED);
+  ctx.strokeStyle=WHITE;ctx.lineWidth=0.05;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(-0.09,-0.18);ctx.lineTo(0.09,-0.02);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0.09,-0.18);ctx.lineTo(-0.09,-0.02);ctx.stroke();
+  ctx.strokeStyle=WHITE;ctx.lineWidth=0.1;
+  ctx.beginPath();ctx.moveTo(-0.15,0.14);ctx.lineTo(0.15,0.14);ctx.stroke();
+  limb(0.06,0.30,lR[0],lR[1],0.15,RED,lBend);
+  ctx.fillStyle=WHITE;ctx.beginPath();ctx.arc(lR[0],lR[1],0.09,0,TAU);ctx.fill();
+  ctx.fillStyle=WHITE;ctx.beginPath();ctx.arc(lL[0],lL[1],0.085,0,TAU);ctx.fill();
+  limb(0.14,-0.30,aR[0],aR[1],0.12,RED,aBend);
+  ctx.fillStyle=WHITE;ctx.beginPath();ctx.arc(aR[0],aR[1],0.08,0,TAU);ctx.fill();
+  ctx.beginPath();ctx.arc(aL[0],aL[1],0.075,0,TAU);ctx.fill();
+  ctx.fillStyle=SKIN;ctx.beginPath();ctx.arc(0,-0.58,0.19,0,TAU);ctx.fill();
+  ctx.fillStyle=YELLOW;ctx.fillRect(-0.195,-0.665,0.39,0.085);
+  const wv=Math.sin(t*9)*0.1;
+  ctx.strokeStyle=YELLOW;ctx.lineWidth=0.05;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(-0.17,-0.62);
+  ctx.quadraticCurveTo(-0.42,-0.6+wv,-0.58,-0.5+wv*1.6);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-0.17,-0.6);
+  ctx.quadraticCurveTo(-0.4,-0.54-wv,-0.55,-0.42-wv*1.4);ctx.stroke();
+  ctx.fillStyle='#14172b';
+  ctx.fillRect(0.05,-0.6,0.045,0.035);
+  ctx.fillRect(0.13,-0.6,0.045,0.035);
+  ctx.restore();
+}
+
+function render(t){
+  drawSky(t);
+  drawCrowdLayer(0.72,t,crowdFarCv);
+  drawTowers(t);
+  drawCrowdLayer(0.86,t,crowdNearCv);
+  drawCourse(t);
+  drawShadow();
+  drawHero(t);
+  drawWater(t);
+  drawParts();
+}
+
+/* ================= CAMERA ================= */
+function updateCam(rdt){
+  if(G.paused){render(G.envT);return;} /* frozen camera while paused — no lerp/shake decay */
+  let tx,ty;
+  if(G.state==='TITLE'){
+    const p=(Math.sin(G.t*0.06)+1)/2;
+    tx=-1+p*Math.max(0.5,WD.width-viewW);ty=-2.2;
+  }else if(G.state==='FAIL'){
+    tx=G.failCam-viewW*0.4;ty=-2.2;
+  }else{
+    tx=P.x-viewW*0.35;
+    ty=clamp(P.y-3.2,-2.2,11);
+  }
+  tx=clamp(tx,-0.5,Math.max(-0.5,WD.width-viewW+0.5));
+  camX+=(tx-camX)*(1-Math.exp(-5*rdt));
+  camY+=(ty-camY)*(1-Math.exp(-4*rdt));
+  if(G.shake>0.002&&SET.shake){
+    ctx.save();
+    ctx.translate(rand(-1,1)*G.shake*14,rand(-1,1)*G.shake*10);
+    G.shake*=Math.exp(-3.2*rdt);
+    render(G.envT);
+    ctx.restore();
+    return;
+  }
+  render(G.envT);
+}
+
+/* ================= MAIN LOOP ================= */
+let fpsCount=0,fpsLast=0;
+function tick(rdt){
+  if(G.paused)return;
+  G.t+=rdt;
+  const dt=Math.min(rdt,0.05)*G.timeScale;
+  G.envT+=dt;
+  updateSinks(dt);
+  updateParts(dt);
+  switch(G.state){
+    case 'RUN':stRun(dt);break;
+    case 'HANG':stHang(dt);break;
+    case 'FERRIS':stFerris(dt);break;
+    case 'SALMON':stSalmon(dt);break;
+    case 'ZIP':stZip(dt);break;
+    case 'CLIFF':stCliff(dt);break;
+    case 'ROPE':stRope(dt);break;
+    case 'LEDGE':stLedge(dt);break;
+    case 'WALL':stWall(dt);break;
+    case 'CLIMB':stClimb(dt);break;
+    case 'FAIL':stFail(dt,rdt);break;
+    case 'WIN':stWin(dt,rdt);break;
+  }
+  if(G.timerStarted&&['RUN','HANG','FERRIS','SALMON','ZIP','CLIFF','LEDGE','WALL','CLIMB','ROPE'].includes(G.state))
+    G.runTime+=dt;
+  if(!['RUN','HANG','FERRIS','SALMON','ZIP'].includes(G.state))jumpEdge=false;
+  G.cheer=lerp(G.cheer,0,1-Math.exp(-0.9*rdt));
+  if(G.timerStarted&&SET.timerOn)timerEl.textContent=fmtTime(G.runTime);
+  if(SET.showFPS){
+    fpsCount++;
+    if(G.t-fpsLast>0.5){
+      $('fps').textContent=Math.round(fpsCount/(G.t-fpsLast))+' FPS';
+      fpsLast=G.t;fpsCount=0;
+    }
+  }
+}
+
+let last=performance.now();
+function frame(now){
+  requestAnimationFrame(frame);
+  const rdt=Math.min((now-last)/1000,0.05);last=now;
+  tick(rdt);
+  updateCam(rdt);
+}
+requestAnimationFrame(frame);
+
+/* ================= SETTINGS UI ================= */
+function buildSettingsUI(){
+  const p=$('settingsPanel');
+  p.innerHTML='';
+  const sec=(title,rows)=>{
+    const d=document.createElement('div');d.className='setSection';
+    d.innerHTML='<h3>'+title+'</h3>';
+    rows.forEach(r=>d.appendChild(r));
+    p.appendChild(d);
+  };
+  const row=(label,ctrl,valEl)=>{
+    const d=document.createElement('div');d.className='setRow';
+    d.innerHTML='<label>'+label+'</label>';
+    d.appendChild(ctrl);
+    if(valEl)d.appendChild(valEl);
+    return d;
+  };
+  const range=(min,max,step,val,cb)=>{
+    const r=document.createElement('input');
+    r.type='range';r.min=min;r.max=max;r.step=step;r.value=val;
+    r.oninput=()=>cb(parseFloat(r.value));
+    return r;
+  };
+  const toggle=(val,cb)=>{
+    const t=document.createElement('div');
+    t.className='setToggle'+(val?' on':'');
+    t.onclick=()=>{cb(!t.classList.contains('on'));t.classList.toggle('on');};
+    return t;
+  };
+  const selectEl=(options,val,cb)=>{
+    const s=document.createElement('select');s.className='setSelect';
+    options.forEach(o=>{const op=document.createElement('option');op.value=o[0];op.textContent=o[1];s.appendChild(op);});
+    s.value=val;s.onchange=()=>cb(s.value);
+    return s;
+  };
+  const valSpan=(text)=>{const s=document.createElement('span');s.className='val';s.textContent=text;return s;};
+
+  /* AUDIO */
+  const vol=valSpan(Math.round(SET.volume*100)+'%');
+  sec('AUDIO',[
+    row('Master Volume',range(0,1,0.05,SET.volume,v=>{SET.volume=v;vol.textContent=Math.round(v*100)+'%';if(Sfx.master)Sfx.master.gain.value=Sfx.muted?0:v;}),vol),
+    row('Sound Effects',toggle(SET.sfx,v=>{SET.sfx=v;})),
+    row('Crowd Ambience',toggle(SET.ambient,v=>{SET.ambient=v;if(Sfx.ctx){if(v)Sfx.startAmb();else Sfx.stopAmb();}}))
+  ]);
+  /* DISPLAY */
+  sec('DISPLAY',[
+    row('Quality',selectEl([['high','High'],['medium','Medium'],['low','Low']],SET.quality,v=>{SET.quality=v;applySettings();})),
+    row('Screen Shake',toggle(SET.shake,v=>{SET.shake=v;})),
+    row('Hints & Prompts',toggle(SET.hints,v=>{SET.hints=v;}))
+  ]);
+  /* GAMEPLAY */
+  sec('GAMEPLAY',[
+    row('Difficulty',selectEl([['normal','Normal'],['hard','Hard']],SET.difficulty,v=>{SET.difficulty=v;})),
+    row('Obstacle Info Cards',toggle(SET.cardInfo!==false,v=>{SET.cardInfo=v;})),
+    row('Timer Display',toggle(SET.timerOn,v=>{SET.timerOn=v;timerEl.style.display=v?'block':'none';})),
+    row('FPS Counter',toggle(SET.showFPS,v=>{SET.showFPS=v;$('fps').classList.toggle('hide',!v);}))
+  ]);
+  /* DATA */
+  const clearBtn=document.createElement('button');
+  clearBtn.className='ghost';clearBtn.textContent='CLEAR ALL DATA';
+  clearBtn.onclick=()=>{
+    try{
+      localStorage.removeItem(SAVE_UNLOCK);
+      for(let i=1;i<=6;i++)localStorage.removeItem(SAVE_BEST+i);
+    }catch(e){}
+    buildLevelList();
+    flash('ALL DATA CLEARED!');
+  };
+  sec('DATA',[clearBtn]);
+}
+let settingsFrom='';
+function toggleSettings(){
+  const ov=$('settingsOv');
+  if(ov.classList.contains('hide')){
+    settingsFrom=G.state==='SETTINGS'?'TITLE':G.state;
+    G.state='SETTINGS';
+    buildSettingsUI();
+    show(ov);
+  }else{
+    hide(ov);
+    saveSettings();
+    G.state=settingsFrom;
+    if(G.state==='RUN'){show($('hud'));hide($('title'));}
+    else if(G.state==='TITLE'){hide($('hud'));show($('title'));}
+  }
+}
+ $('settingsBtn').addEventListener('click',()=>{saveSettings();toggleSettings();});
+ $('settingsClose').addEventListener('click',()=>{saveSettings();toggleSettings();});
+
+/* ================= UI WIRING ================= */
+function toggleMute(){Sfx.muted=!Sfx.muted;
+  SET.soundOn=!Sfx.muted;saveSettings();
+  if(Sfx.master)Sfx.master.gain.value=Sfx.muted?0:SET.volume;
+  $('muteBtn').textContent=Sfx.muted?'SOUND OFF':'SOUND ON';}
+function togglePause(){
+  G.paused=!G.paused;
+  if(G.paused){show($('pauseOv'));if(Sfx.ctx)Sfx.ctx.suspend();}
+  else{hide($('pauseOv'));if(Sfx.ctx)Sfx.ctx.resume();}
+}
+/* force landscape: fullscreen + orientation lock on devices that allow it
+   (Android). Devices that refuse (iPhone Safari) get the rotate-gate overlay. */
+async function goLandscape(){
+  if(!isTouch)return;
+  try{if(!document.fullscreenElement&&document.documentElement.requestFullscreen)
+    await document.documentElement.requestFullscreen({navigationUI:'hide'});}catch(e){}
+  try{if(screen.orientation&&screen.orientation.lock)
+    await screen.orientation.lock('landscape');}catch(e){}
+}
+function buildLevelList(){
+  const list=$('levelList');list.innerHTML='';
+  const unlock=getUnlock();
+  STAGE_META.forEach((m,i)=>{
+    const n=i+1,locked=n>unlock,best=getBest(n);
+    const btn=document.createElement('button');
+    btn.className='lvlBtn'+(locked?' locked':'');
+    btn.innerHTML='<div class="ln">'+n+'</div><div class="li"><div class="lt">'+m.name+'</div>'+
+      '<div class="lb">'+(locked?'LOCKED — CLEAR STAGE '+(n-1):(best!=null?'COURSE RECORD — '+fmtTime(best):'NO RECORD YET'))+'</div></div>'+
+      (locked?'<div class="lock">&#128274;</div>':'');
+    if(!locked)btn.addEventListener('click',()=>{
+      Sfx.init();if(Sfx.ctx&&Sfx.ctx.state==='suspended')Sfx.ctx.resume();
+      Sfx.startAmb();goLandscape();loadStage(n);});
+    else btn.addEventListener('click',()=>Sfx.bonk());
+    list.appendChild(btn);
+  });
+}
+function showTitle(){
+  G.state='TITLE';G.timerStarted=false;G.paused=false;
+  hide($('hud'));hide($('failOv'));hide($('winOv'));hide($('settingsOv'));hide($('pauseOv'));
+  if(Sfx.ctx&&Sfx.ctx.state==='suspended')Sfx.ctx.resume();
+  buildLevelList();show($('title'));
+  buildCrowd();
+}
+ $('retryBtn').addEventListener('click',()=>{goLandscape();retryCheckpoint();});
+ $('restartBtn').addEventListener('click',()=>{goLandscape();loadStage(WD.n);});
+ $('againBtn').addEventListener('click',()=>{goLandscape();loadStage(WD.n);});
+ $('nextBtn').addEventListener('click',()=>{goLandscape();loadStage(WD.n+1);});
+ $('selectBtn').addEventListener('click',showTitle);
+ $('muteBtn').addEventListener('click',toggleMute);
+ $('resumeBtn').addEventListener('click',togglePause);
+
+/* ================= BOOT ================= */
+if(isTouch){
+  $('ctrlKeys').innerHTML='HOLD <span class="kbd">\u25B6</span> TO RUN · TAP <span class="kbd">JUMP</span> TO JUMP / RELEASE · TAP <span class="kbd">\u25C0</span><span class="kbd">\u25B6</span> ON ROPES<br>Beat a stage to unlock the next. Every stage keeps its own course record.';
+  ['retryBtn','restartBtn','againBtn','nextBtn'].forEach(id=>{const b=$(id);b.textContent=b.textContent.replace(/\s*[—–-]\s*[A-Z]$/,'');});
+}
+buildCrowd();
+applySettings();
+$('muteBtn').textContent=Sfx.muted?'SOUND OFF':'SOUND ON';
+showTitle();
+
+})();
+</script>
+</body>
+</html>
